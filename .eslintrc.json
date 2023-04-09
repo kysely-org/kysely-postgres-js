@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "extends": ["prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {"project": ["./tsconfig.json"]},
+  "plugins": ["prettier", "import", "@typescript-eslint"],
+  "rules": {
+    "prettier/prettier": ["error"],
+    "import/extensions": [2, "ignorePackages"]
+  },
+  "settings": {
+    "import/extensions": [".ts"]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "extension": ["ts"],
+  "recursive": true,
+  "require": ["esbuild-runner/register"],
+  "timeout": 30000
+}

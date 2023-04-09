@@ -1,0 +1,68 @@
+{
+  "name": "kysely-postgres-js",
+  "version": "0.0.1",
+  "description": "Kysely dialect for PostgreSQL using the Postgres.js client",
+  "repository": "https://github.com/igalklebanov/kysely-postgres-js.git",
+  "homepage": "https://github.com/igalklebanov/kysely-postgres-js",
+  "author": "Igal Klebanov <igalklebanov@gmail.com>",
+  "license": "MIT",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "kysely",
+    "postgres",
+    "postgres.js",
+    "postgresql",
+    "dialect"
+  ],
+  "scripts": {
+    "build": "tsup && node ./scripts/dist-fix.js",
+    "clean": "rm -rf dist",
+    "fmt": "prettier --write .",
+    "fmt:check": "prettier --check .",
+    "lint": "eslint src --ext .ts",
+    "prepack": "pnpm run lint && pnpm run build",
+    "test:nodejs": "mocha ./tests/nodejs",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "kysely": ">= 0.24.0 < 1",
+    "postgres": ">= 3.0.0 < 4"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^1.0.1",
+    "@types/chai": "^4.3.4",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/chai-subset": "^1.3.3",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.1",
+    "@typescript-eslint/parser": "^5.57.1",
+    "chai": "^4.3.7",
+    "chai-subset": "^1.6.0",
+    "esbuild": "^0.17.15",
+    "esbuild-runner": "^2.2.2",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
+    "kysely": "^0.24.2",
+    "mocha": "^10.2.0",
+    "postgres": "^3.3.4",
+    "prettier": "^2.8.7",
+    "prettier-plugin-organize-imports": "^3.2.2",
+    "prettier-plugin-pkg": "^0.17.1",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
+  },
+  "sideEffects": false
+}

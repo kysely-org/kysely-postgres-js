@@ -3,7 +3,7 @@ import type {Sql} from 'postgres'
 
 import {PostgresJSConnection} from './connection.js'
 import type {PostgresJSDialectConfig} from './types.js'
-import {freeze} from './utils.js'
+import {createPostgres, freeze} from './utils.js'
 
 export class PostgresJSDriver implements Driver {
   readonly #config: PostgresJSDialectConfig
@@ -11,7 +11,8 @@ export class PostgresJSDriver implements Driver {
 
   constructor(config: PostgresJSDialectConfig) {
     this.#config = freeze({...config})
-    this.#sql = this.#config.postgres(this.#config.options)
+
+    this.#sql = createPostgres(this.#config)
   }
 
   async init(): Promise<void> {

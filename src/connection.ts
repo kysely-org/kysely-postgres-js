@@ -3,7 +3,7 @@ import type {Sql} from 'postgres'
 
 import {PostgresJSDialectError} from './errors.js'
 import type {PostgresJSDialectConfig} from './types.js'
-import {freeze} from './utils.js'
+import {createPostgres, freeze} from './utils.js'
 
 export class PostgresJSConnection implements DatabaseConnection {
   readonly #config: PostgresJSDialectConfig
@@ -22,7 +22,7 @@ export class PostgresJSConnection implements DatabaseConnection {
 
     const {isolationLevel} = settings
 
-    this.#transaction = this.#config.postgres({...this.#config.options, max: 1})
+    this.#transaction = createPostgres({...this.#config, options: {...this.#config.options, max: 1}})
 
     const statement = `start transaction${isolationLevel ? ` ${isolationLevel}` : ''}`
 

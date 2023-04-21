@@ -1,11 +1,14 @@
 import {DeleteResult, InsertResult, UpdateResult, sql, type Kysely, type Transaction} from 'kysely'
 
 import {
+  CONFIGS,
   DEFAULT_DATA_SET,
   POOL_SIZE,
+  TestConfig,
   clearDatabase,
   destroyTest,
   expect,
+  forEach,
   initTest,
   insertDefaultDataSet,
   testSql,
@@ -14,11 +17,11 @@ import {
   type TestContext,
 } from './test-setup'
 
-describe('PostgresJSDialect', () => {
+forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
   let ctx: TestContext
 
   before(async function () {
-    ctx = await initTest(this)
+    ctx = await initTest(this, config.config)
   })
 
   beforeEach(async () => {

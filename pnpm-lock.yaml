@@ -6,6 +6,7 @@ specifiers:
   '@types/chai-as-promised': ^7.1.5
   '@types/chai-subset': ^1.3.3
   '@types/mocha': ^10.0.1
+  '@types/mocha-each': ^2.0.0
   '@types/node': ^18.15.11
   '@typescript-eslint/eslint-plugin': ^5.57.1
   '@typescript-eslint/parser': ^5.57.1
@@ -19,6 +20,7 @@ specifiers:
   eslint-plugin-prettier: ^4.2.1
   kysely: ^0.24.2
   mocha: ^10.2.0
+  mocha-each: ^2.0.1
   postgres: ^3.3.4
   prettier: ^2.8.7
   prettier-plugin-organize-imports: ^3.2.2
@@ -32,6 +34,7 @@ devDependencies:
   '@types/chai-as-promised': 7.1.5
   '@types/chai-subset': 1.3.3
   '@types/mocha': 10.0.1
+  '@types/mocha-each': 2.0.0
   '@types/node': 18.15.11
   '@typescript-eslint/eslint-plugin': 5.57.1_z2kgtpg43567unkcwpmcdtgh2q
   '@typescript-eslint/parser': 5.57.1_voubu7prgxjfsfbgx5d4sqnwiy
@@ -45,6 +48,7 @@ devDependencies:
   eslint-plugin-prettier: 4.2.1_mrzcadguhkbme6yx3ehduvsjxu
   kysely: 0.24.2
   mocha: 10.2.0
+  mocha-each: 2.0.1
   postgres: 3.3.4
   prettier: 2.8.7
   prettier-plugin-organize-imports: 3.2.2_qs7p46od4w5ca3rvorft3675lm
@@ -356,6 +360,12 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/mocha-each/2.0.0:
+    resolution: {integrity: sha512-wZWPqB+pnH9SL7qzORZha1dBt5ypYgPYDSma9wwtQVGmu36QonRWnc8hbJwgMaCPYHTHzrAGMnwp+we/SGI2YQ==}
+    dependencies:
+      '@types/mocha': 10.0.1
     dev: true
 
   /@types/mocha/10.0.1:
@@ -1765,6 +1775,12 @@ packages:
     resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
     dev: true
 
+  /mocha-each/2.0.1:
+    resolution: {integrity: sha512-0ZgWY5ajbnROXkfyaDb+0RAYzDBH3QVow/1zJiyl7lYMRnj1Nid8RDP2+/2TTajB5n4vr21v35MjB72GjFFj2g==}
+    dependencies:
+      sprintf-js: 1.1.2
+    dev: true
+
   /mocha/10.2.0:
     resolution: {integrity: sha512-IDY7fl/BecMwFHzoqF2sg/SHHANeBoMMXFlS9r0OXKDssYE1M5O43wUY/9BVPeIvfH2zmEbBfseqN9gBQZzXkg==}
     engines: {node: '>= 14.0.0'}
@@ -2174,6 +2190,10 @@ packages:
     engines: {node: '>= 8'}
     dependencies:
       whatwg-url: 7.1.0
+    dev: true
+
+  /sprintf-js/1.1.2:
+    resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==}
     dev: true
 
   /string-width/4.2.3:

@@ -63,9 +63,22 @@ interface Database {
 
 const db = new Kysely<Database>({
   dialect: new PostgresJSDialect({
+    connectionString: 'postgres://admin@localhost:5434/test',
+    options: {
+      max: 10,
+    },
+    postgres,
+  }),
+})
+
+// or...
+
+const db = new Kysely<Database>({
+  dialect: new PostgresJSDialect({
     options: {
       database: 'test',
       host: 'localhost',
+      max: 10,
       port: 5434,
       user: 'admin',
     },

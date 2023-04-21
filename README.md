@@ -48,7 +48,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 ## Usage
 
 ```ts
-import {Kysely} from 'kysely'
+import {type GeneratedAlways, Kysely} from 'kysely'
 import {PostgresJSDialect} from 'kysely-postgres-js'
 import postgres from 'postgres'
 

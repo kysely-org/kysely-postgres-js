@@ -1,6 +1,6 @@
 {
   "name": "kysely-postgres-js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Kysely dialect for PostgreSQL using the Postgres.js client",
   "repository": "https://github.com/igalklebanov/kysely-postgres-js.git",
   "homepage": "https://github.com/igalklebanov/kysely-postgres-js",

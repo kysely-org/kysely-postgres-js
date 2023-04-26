@@ -1,4 +1,4 @@
-import {DeleteResult, InsertResult, UpdateResult, sql, type Kysely, type Transaction} from 'kysely'
+import {CompiledQuery, DeleteResult, InsertResult, UpdateResult, sql, type Kysely, type Transaction} from 'kysely'
 
 import {
   CONFIGS,
@@ -19,13 +19,19 @@ import {
 
 forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
   let ctx: TestContext
+  let executedQueries: CompiledQuery[] = []
 
   before(async function () {
-    ctx = await initTest(this, config.config)
+    ctx = await initTest(this, config.config, (event) => {
+      if (event.level === 'query') {
+        executedQueries.push(event.query)
+      }
+    })
   })
 
   beforeEach(async () => {
     await insertDefaultDataSet(ctx)
+    executedQueries = []
   })
 
   afterEach(async () => {
@@ -85,6 +91,57 @@ forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
         }
       })
     }
+  })
+
+  it('should set the transaction isolation level', async () => {
+    await ctx.db
+      .transaction()
+      .setIsolationLevel('serializable')
+      .execute(async (trx) => {
+        await trx
+          .insertInto('person')
+          .values({
+            first_name: 'Foo',
+            last_name: 'Barson',
+            gender: 'male',
+          })
+          .execute()
+      })
+
+    expect(
+      executedQueries.map((it) => ({
+        sql: it.sql,
+        parameters: it.parameters,
+      })),
+    ).to.eql([
+      {
+        sql: 'start transaction isolation level serializable',
+        parameters: [],
+      },
+      {
+        sql: 'insert into "person" ("first_name", "last_name", "gender") values ($1, $2, $3)',
+        parameters: ['Foo', 'Barson', 'male'],
+      },
+      {sql: 'commit', parameters: []},
+    ])
+  })
+
+  it('should be able to start a transaction with a single connection', async () => {
+    const result = await ctx.db.connection().execute((db) => {
+      return db.transaction().execute((trx) => {
+        return trx
+          .insertInto('person')
+          .values({
+            first_name: 'Foo',
+            last_name: 'Barson',
+            gender: 'male',
+          })
+          .returning('first_name')
+          .executeTakeFirstOrThrow()
+      })
+    })
+
+    expect(result.first_name).to.equal('Foo')
   })
 
   it('should stream results', async () => {

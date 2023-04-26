@@ -1,4 +1,4 @@
-import type {CompiledQuery, DatabaseConnection, QueryResult, TransactionSettings} from 'kysely'
+import {CompiledQuery, DatabaseConnection, QueryResult, TransactionSettings} from 'kysely'
 import type {Sql} from 'postgres'
 
 import {PostgresJSDialectError} from './errors.js'
@@ -24,9 +24,11 @@ export class PostgresJSConnection implements DatabaseConnection {
 
     this.#transaction = createPostgres({...this.#config, options: {...this.#config.options, max: 1}})
 
-    const statement = `start transaction${isolationLevel ? ` ${isolationLevel}` : ''}`
+    const compiledQuery = CompiledQuery.raw(
+      isolationLevel ? `start transaction isolation level ${isolationLevel}` : 'begin',
+    )
 
-    await this.#transaction.unsafe(statement)
+    await this.executeQuery(compiledQuery)
   }
 
   async commitTransaction(): Promise<void> {
@@ -34,7 +36,7 @@ export class PostgresJSConnection implements DatabaseConnection {
       throw new PostgresJSDialectError('no transaction to commit!')
     }
 
-    await this.#transaction`commit`
+    await this.executeQuery(CompiledQuery.raw('commit'))
 
     this.#releaseTransaction()
   }
@@ -58,7 +60,7 @@ export class PostgresJSConnection implements DatabaseConnection {
       throw new PostgresJSDialectError('no transaction to rollback!')
     }
 
-    await this.#transaction`rollback`
+    await this.executeQuery(CompiledQuery.raw('rollback'))
 
     this.#releaseTransaction()
   }

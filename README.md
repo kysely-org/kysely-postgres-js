@@ -2,7 +2,9 @@
 
 ![Powered by TypeScript](https://img.shields.io/badge/powered%20by-typescript-blue.svg)
 
-[Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) using the [Postgres.js](https://github.com/porsager/postgres) client under the hood.
+[Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) using the [Postgres.js](https://github.com/porsager/postgres) client library under the hood.
+
+This dialect should not be confused with Kysely's built-in PostgreSQL dialect, which uses the [pg](https://github.com/brianc/node-postgres) client library instead.
 
 ## Installation
 

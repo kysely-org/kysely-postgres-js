@@ -40,7 +40,7 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 {
   "imports": {
     "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js",
-    "postgres": "https://deno.land/x/postgres@3.3.4"
+    "postgres": "https://deno.land/x/postgresjs@v3.3.4/mod.js"
   }
 }
 ```

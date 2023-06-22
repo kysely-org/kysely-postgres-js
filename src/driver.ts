@@ -20,7 +20,9 @@ export class PostgresJSDriver implements Driver {
   }
 
   async acquireConnection(): Promise<PostgresJSConnection> {
-    return new PostgresJSConnection(this.#config, this.#sql)
+    const reservedConnection = await (this.#sql as any).reserve()
+
+    return new PostgresJSConnection(reservedConnection)
   }
 
   async beginTransaction(connection: PostgresJSConnection, settings: TransactionSettings): Promise<void> {
@@ -35,8 +37,8 @@ export class PostgresJSDriver implements Driver {
     await connection.rollbackTransaction()
   }
 
-  async releaseConnection(_: PostgresJSConnection): Promise<void> {
-    // noop
+  async releaseConnection(connection: PostgresJSConnection): Promise<void> {
+    connection.releaseConnection()
   }
 
   async destroy(): Promise<void> {

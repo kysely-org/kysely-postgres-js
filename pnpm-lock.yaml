@@ -21,7 +21,7 @@ specifiers:
   kysely: ^0.24.2
   mocha: ^10.2.0
   mocha-each: ^2.0.1
-  postgres: ^3.3.4
+  postgres: https://github.com/porsager/postgres.git#reserve
   prettier: ^2.8.7
   prettier-plugin-organize-imports: ^3.2.2
   prettier-plugin-pkg: ^0.17.1
@@ -49,7 +49,7 @@ devDependencies:
   kysely: 0.24.2
   mocha: 10.2.0
   mocha-each: 2.0.1
-  postgres: 3.3.4
+  postgres: github.com/porsager/postgres/07be884dee94433326b7e0eadd59ffb8cbc0a631
   prettier: 2.8.7
   prettier-plugin-organize-imports: 3.2.2_qs7p46od4w5ca3rvorft3675lm
   prettier-plugin-pkg: 0.17.1_prettier@2.8.7
@@ -1984,10 +1984,6 @@ packages:
       yaml: 1.10.2
     dev: true
 
-  /postgres/3.3.4:
-    resolution: {integrity: sha512-XVu0+d/Y56pl2lSaf0c7V19AhAEfpVrhID1IENWN8nf0xch6hFq6dAov5dtUX6ZD46wfr1TxvLhxLtV8WnNsOg==}
-    dev: true
-
   /prelude-ls/1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
@@ -2541,4 +2537,12 @@ packages:
   /yocto-queue/0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+    dev: true
+
+  github.com/porsager/postgres/07be884dee94433326b7e0eadd59ffb8cbc0a631:
+    resolution: {tarball: https://codeload.github.com/porsager/postgres/tar.gz/07be884dee94433326b7e0eadd59ffb8cbc0a631}
+    name: postgres
+    version: 3.3.5
+    prepare: true
+    requiresBuild: true
     dev: true

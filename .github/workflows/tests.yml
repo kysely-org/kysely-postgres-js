@@ -45,7 +45,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts && cd node_modules/postgres && pnpm build
 
       - name: Build
         run: pnpm run build
@@ -85,7 +85,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts && cd node_modules/postgres && pnpm build
 
       - name: Build
         run: pnpm run build

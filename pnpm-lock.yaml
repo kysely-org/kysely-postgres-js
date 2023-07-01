@@ -21,7 +21,7 @@ specifiers:
   kysely: ^0.24.2
   mocha: ^10.2.0
   mocha-each: ^2.0.1
-  postgres: https://github.com/porsager/postgres.git#reserve
+  postgres: https://github.com/porsager/postgres.git#a0d51ba7175be2362dace015392a32871fe66a92
   prettier: ^2.8.7
   prettier-plugin-organize-imports: ^3.2.2
   prettier-plugin-pkg: ^0.17.1
@@ -49,7 +49,7 @@ devDependencies:
   kysely: 0.24.2
   mocha: 10.2.0
   mocha-each: 2.0.1
-  postgres: github.com/porsager/postgres/07be884dee94433326b7e0eadd59ffb8cbc0a631
+  postgres: github.com/porsager/postgres/a0d51ba7175be2362dace015392a32871fe66a92
   prettier: 2.8.7
   prettier-plugin-organize-imports: 3.2.2_qs7p46od4w5ca3rvorft3675lm
   prettier-plugin-pkg: 0.17.1_prettier@2.8.7
@@ -2539,8 +2539,8 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/porsager/postgres/07be884dee94433326b7e0eadd59ffb8cbc0a631:
-    resolution: {tarball: https://codeload.github.com/porsager/postgres/tar.gz/07be884dee94433326b7e0eadd59ffb8cbc0a631}
+  github.com/porsager/postgres/a0d51ba7175be2362dace015392a32871fe66a92:
+    resolution: {tarball: https://codeload.github.com/porsager/postgres/tar.gz/a0d51ba7175be2362dace015392a32871fe66a92}
     name: postgres
     version: 3.3.5
     prepare: true

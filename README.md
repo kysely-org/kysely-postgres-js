@@ -89,18 +89,6 @@ const db = new Kysely<Database>({
 })
 ```
 
-## Caveats
-
-### Single connection
-
-[Postgres.js](https://github.com/porsager/postgres) doesn't provide single connection getter method/s. To get a single connection, you have to create an instance with a pool that has at most one connection (`max: 1`). This is not aligned with Kysely's current design. As a result, `db.connection()` will not work as expected when using a pool with more than one connection.
-If you need to use a single connection, you should instantiate a new `Kysely`
-instance with a pool that has at most one connection.
-
-### Transactions
-
-For transactions, this dialect creates additional pools with at most one connection, so `db.transaction().execute(...)` will work as expected. Keep in mind, this means that total number of connections to the database might exceed the pool size passed to Kysely initially.
-
 ## License
 
 MIT License, see `LICENSE`

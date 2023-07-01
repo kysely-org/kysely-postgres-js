@@ -4,9 +4,9 @@ import type {Sql} from 'postgres'
 import {PostgresJSDialectError} from './errors.js'
 
 export class PostgresJSConnection implements DatabaseConnection {
-  #reservedConnection: Sql
+  #reservedConnection: PostgresJSReservedConnection
 
-  constructor(reservedConnection: Sql) {
+  constructor(reservedConnection: PostgresJSReservedConnection) {
     this.#reservedConnection = reservedConnection
   }
 
@@ -42,7 +42,9 @@ export class PostgresJSConnection implements DatabaseConnection {
   }
 
   releaseConnection(): void {
-    ;(this.#reservedConnection as any).release()
+    this.#reservedConnection.release()
+
+    this.#reservedConnection = null!
   }
 
   async rollbackTransaction(): Promise<void> {
@@ -65,4 +67,8 @@ export class PostgresJSConnection implements DatabaseConnection {
       yield {rows}
     }
   }
+}
+
+interface PostgresJSReservedConnection extends Sql {
+  release(): void
 }

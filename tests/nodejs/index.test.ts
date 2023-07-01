@@ -19,7 +19,7 @@ import {
 
 forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
   let ctx: TestContext
-  let executedQueries: CompiledQuery[] = []
+  const executedQueries: CompiledQuery[] = []
 
   before(async function () {
     ctx = await initTest(this, config.config, (event) => {
@@ -31,7 +31,7 @@ forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
 
   beforeEach(async () => {
     await insertDefaultDataSet(ctx)
-    executedQueries = []
+    executedQueries.length = 0
   })
 
   afterEach(async () => {

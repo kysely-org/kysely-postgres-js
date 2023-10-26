@@ -57,8 +57,8 @@ devDependencies:
     specifier: ^4.2.1
     version: 4.2.1(eslint-config-prettier@8.8.0)(eslint@8.38.0)(prettier@2.8.7)
   kysely:
-    specifier: ^0.24.2
-    version: 0.24.2
+    specifier: ^0.26.3
+    version: 0.26.3
   mocha:
     specifier: ^10.2.0
     version: 10.2.0
@@ -1689,8 +1689,8 @@ packages:
       minimist: 1.2.8
     dev: true
 
-  /kysely@0.24.2:
-    resolution: {integrity: sha512-+7eaTJNUYm2yRq1x+lEOZc+78TO35dTZ9b0dh49+Z9CTt2byMSbMiOKpwPlOyCAaHD4kILkAYWYZNywFlmBwRA==}
+  /kysely@0.26.3:
+    resolution: {integrity: sha512-yWSgGi9bY13b/W06DD2OCDDHQmq1kwTGYlQ4wpZkMOJqMGCstVCFIvxCCVG4KfY1/3G0MhDAcZsip/Lw8/vJWw==}
     engines: {node: '>=14.0.0'}
     dev: true
 

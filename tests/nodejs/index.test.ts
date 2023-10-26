@@ -1,14 +1,11 @@
 import {CompiledQuery, DeleteResult, InsertResult, UpdateResult, sql, type Kysely, type Transaction} from 'kysely'
 
 import {
-  CONFIGS,
   DEFAULT_DATA_SET,
   POOL_SIZE,
-  TestConfig,
   clearDatabase,
   destroyTest,
   expect,
-  forEach,
   initTest,
   insertDefaultDataSet,
   testSql,
@@ -17,12 +14,12 @@ import {
   type TestContext,
 } from './test-setup'
 
-forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
+describe('PostgresJSDialect: %s', () => {
   let ctx: TestContext
   const executedQueries: CompiledQuery[] = []
 
   before(async function () {
-    ctx = await initTest(this, config.config, (event) => {
+    ctx = await initTest(this, (event) => {
       if (event.level === 'query') {
         executedQueries.push(event.query)
       }
@@ -380,7 +377,9 @@ forEach(CONFIGS).describe('PostgresJSDialect: %s', (config: TestConfig) => {
   })
 
   it('should delete two rows', async () => {
-    const query = ctx.db.deleteFrom('person').where('first_name', '=', 'Jennifer').orWhere('first_name', '=', 'Arnold')
+    const query = ctx.db
+      .deleteFrom('person')
+      .where((eb) => eb('first_name', '=', 'Jennifer').or('first_name', '=', 'Arnold'))
 
     const result = await query.executeTakeFirst()
 

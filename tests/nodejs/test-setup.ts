@@ -58,7 +58,6 @@ interface PetInsertParams extends Omit<Pet, 'id' | 'owner_id'> {
 }
 
 export interface TestContext {
-  config: KyselyConfig
   db: Kysely<Database>
 }
 
@@ -68,56 +67,30 @@ export const PLUGINS: KyselyPlugin[] = []
 
 export const POOL_SIZE = 20
 
-const DATABASE = 'test'
-const HOST = 'localhost'
-const PORT = 5434
-const USER = 'admin'
+export const CONFIG: KyselyConfig = {
+  dialect: new PostgresJSDialect({
+    postgres: postgres({
+      database: 'test',
+      host: 'localhost',
+      max: 20,
+      onnotice() {},
+      port: 5434,
+      user: 'admin',
+    }),
+  }),
+}
 
-export const CONFIGS: {config: KyselyConfig; toString: () => string}[] = [
-  {
-    config: {
-      dialect: new PostgresJSDialect({
-        connectionString: `postgres://${USER}@${HOST}:${PORT}/${DATABASE}`,
-        options: {
-          max: POOL_SIZE,
-          onnotice() {},
-        },
-        postgres,
-      }),
-    },
-    toString: () => 'connection-string',
-  },
-  {
-    config: {
-      dialect: new PostgresJSDialect({
-        options: {
-          database: DATABASE,
-          host: HOST,
-          max: POOL_SIZE,
-          onnotice() {},
-          port: PORT,
-          user: USER,
-        },
-        postgres,
-      }),
-    },
-    toString: () => 'options',
-  },
-]
-
-export type TestConfig = (typeof CONFIGS)[number]
-
-export async function initTest(ctx: Mocha.Context, config: KyselyConfig, log?: Logger): Promise<TestContext> {
+export async function initTest(ctx: Mocha.Context, log?: Logger): Promise<TestContext> {
   ctx.timeout(TEST_INIT_TIMEOUT)
 
   const db = await connect({
-    ...config,
+    ...CONFIG,
     log,
   })
 
   await createDatabase(db)
 
-  return {config, db}
+  return {db}
 }
 
 export async function destroyTest(ctx: TestContext): Promise<void> {

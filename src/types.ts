@@ -1,13 +1,5 @@
-import type postgres from 'postgres'
-import type {Options} from 'postgres'
+import type {Sql} from 'postgres'
 
-export type PostgresJSDialectConfig =
-  | {
-      connectionString: string
-      options?: Options<any>
-      postgres: typeof postgres
-    }
-  | {
-      options: Options<any>
-      postgres: typeof postgres
-    }
+export interface PostgresJSDialectConfig {
+  readonly postgres: Sql
+}

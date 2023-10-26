@@ -36,7 +36,7 @@
   },
   "peerDependencies": {
     "kysely": ">= 0.24.0 < 1",
-    "postgres": ">= 3.0.0 < 4"
+    "postgres": ">= 3.4.0 < 4"
   },
   "devDependencies": {
     "@tsconfig/node18": "^1.0.1",
@@ -59,6 +59,7 @@
     "kysely": "^0.24.2",
     "mocha": "^10.2.0",
     "mocha-each": "^2.0.1",
+    "postgres": "^3.4.1",
     "prettier": "^2.8.7",
     "prettier-plugin-organize-imports": "^3.2.2",
     "prettier-plugin-pkg": "^0.17.1",

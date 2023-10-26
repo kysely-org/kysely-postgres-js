@@ -1,18 +1,14 @@
 import type {Driver, TransactionSettings} from 'kysely'
-import type {Sql} from 'postgres'
 
 import {PostgresJSConnection} from './connection.js'
 import type {PostgresJSDialectConfig} from './types.js'
-import {createPostgres, freeze} from './utils.js'
+import {freeze} from './utils.js'
 
 export class PostgresJSDriver implements Driver {
   readonly #config: PostgresJSDialectConfig
-  readonly #sql: Sql
 
   constructor(config: PostgresJSDialectConfig) {
     this.#config = freeze({...config})
-
-    this.#sql = createPostgres(this.#config)
   }
 
   async init(): Promise<void> {
@@ -20,7 +16,7 @@ export class PostgresJSDriver implements Driver {
   }
 
   async acquireConnection(): Promise<PostgresJSConnection> {
-    const reservedConnection = await (this.#sql as any).reserve()
+    const reservedConnection = await this.#config.postgres.reserve()
 
     return new PostgresJSConnection(reservedConnection)
   }
@@ -42,6 +38,6 @@ export class PostgresJSDriver implements Driver {
   }
 
   async destroy(): Promise<void> {
-    await this.#sql.end()
+    await this.#config.postgres.end()
   }
 }

@@ -377,7 +377,9 @@ describe('PostgresJSDialect: %s', () => {
   })
 
   it('should delete two rows', async () => {
-    const query = ctx.db.deleteFrom('person').where('first_name', '=', 'Jennifer').orWhere('first_name', '=', 'Arnold')
+    const query = ctx.db
+      .deleteFrom('person')
+      .where((eb) => eb('first_name', '=', 'Jennifer').or('first_name', '=', 'Arnold'))
 
     const result = await query.executeTakeFirst()
 

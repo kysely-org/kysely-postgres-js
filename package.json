@@ -59,7 +59,6 @@
     "kysely": "^0.24.2",
     "mocha": "^10.2.0",
     "mocha-each": "^2.0.1",
-    "postgres": "https://github.com/porsager/postgres.git#a0d51ba7175be2362dace015392a32871fe66a92",
     "prettier": "^2.8.7",
     "prettier-plugin-organize-imports": "^3.2.2",
     "prettier-plugin-pkg": "^0.17.1",

@@ -1,28 +1,16 @@
 import {CompiledQuery, DatabaseConnection, QueryResult, TransactionSettings} from 'kysely'
-import type {Sql} from 'postgres'
-
+import type {ReservedSql} from 'postgres'
 import {PostgresJSDialectError} from './errors.js'
-import type {PostgresJSDialectConfig} from './types.js'
-import {createPostgres, freeze} from './utils.js'
 
 export class PostgresJSConnection implements DatabaseConnection {
-  readonly #config: PostgresJSDialectConfig
-  #sql: Sql
-  #transaction?: Sql
+  #reservedConnection: ReservedSql
 
-  constructor(config: PostgresJSDialectConfig, sql: Sql) {
-    this.#config = freeze({...config})
-    this.#sql = sql
+  constructor(reservedConnection: ReservedSql) {
+    this.#reservedConnection = reservedConnection
   }
 
   async beginTransaction(settings: TransactionSettings): Promise<void> {
-    if (this.#transaction) {
-      throw new PostgresJSDialectError('transaction already begun!')
-    }
-
     const {isolationLevel} = settings
-
-    this.#transaction = createPostgres({...this.#config, options: {...this.#config.options, max: 1}})
 
     const compiledQuery = CompiledQuery.raw(
       isolationLevel ? `start transaction isolation level ${isolationLevel}` : 'begin',
@@ -32,17 +20,14 @@ export class PostgresJSConnection implements DatabaseConnection {
   }
 
   async commitTransaction(): Promise<void> {
-    if (!this.#transaction) {
-      throw new PostgresJSDialectError('no transaction to commit!')
-    }
-
     await this.executeQuery(CompiledQuery.raw('commit'))
-
-    this.#releaseTransaction()
   }
 
   async executeQuery<R>(compiledQuery: CompiledQuery<unknown>): Promise<QueryResult<R>> {
-    const result = await this.#resolveExecutor().unsafe<R[]>(compiledQuery.sql, compiledQuery.parameters.slice() as any)
+    const result = await this.#reservedConnection.unsafe<R[]>(
+      compiledQuery.sql,
+      compiledQuery.parameters.slice() as any,
+    )
 
     const rows = Array.from(result.values())
 
@@ -55,14 +40,14 @@ export class PostgresJSConnection implements DatabaseConnection {
     return {rows}
   }
 
+  releaseConnection(): void {
+    this.#reservedConnection.release()
+
+    this.#reservedConnection = null!
+  }
+
   async rollbackTransaction(): Promise<void> {
-    if (!this.#transaction) {
-      throw new PostgresJSDialectError('no transaction to rollback!')
-    }
-
     await this.executeQuery(CompiledQuery.raw('rollback'))
-
-    this.#releaseTransaction()
   }
 
   async *streamQuery<R>(
@@ -73,23 +58,12 @@ export class PostgresJSConnection implements DatabaseConnection {
       throw new PostgresJSDialectError('chunkSize must be a positive integer')
     }
 
-    const cursor = this.#resolveExecutor()
+    const cursor = this.#reservedConnection
       .unsafe<R[]>(compiledQuery.sql, compiledQuery.parameters.slice() as any)
       .cursor(chunkSize)
 
     for await (const rows of cursor) {
       yield {rows}
-    }
-  }
-
-  #resolveExecutor(): Sql {
-    return this.#transaction || this.#sql
-  }
-
-  #releaseTransaction(): void {
-    if (this.#transaction) {
-      this.#transaction.end()
-      this.#transaction = undefined
     }
   }
 }

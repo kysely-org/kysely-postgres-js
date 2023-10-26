@@ -2,7 +2,7 @@
 
 ![Powered by TypeScript](https://img.shields.io/badge/powered%20by-typescript-blue.svg)
 
-[Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) using the [Postgres.js](https://github.com/porsager/postgres) client library under the hood.
+[Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) using the [Postgres.js](https://github.com/porsager/postgres) client library under the hood (version >= 3.4).
 
 This dialect should not be confused with Kysely's built-in PostgreSQL dialect, which uses the [pg](https://github.com/brianc/node-postgres) client library instead.
 
@@ -41,8 +41,8 @@ To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking
 ```json
 {
   "imports": {
-    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.23.5/dist/esm/index.js",
-    "postgres": "https://deno.land/x/postgresjs@v3.3.4/mod.js"
+    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.26.3/dist/esm/index.js",
+    "postgres": "https://deno.land/x/postgresjs@v3.4.0/mod.js"
   }
 }
 ```
@@ -65,26 +65,13 @@ interface Database {
 
 const db = new Kysely<Database>({
   dialect: new PostgresJSDialect({
-    connectionString: 'postgres://admin@localhost:5434/test',
-    options: {
-      max: 10,
-    },
-    postgres,
-  }),
-})
-
-// or...
-
-const db = new Kysely<Database>({
-  dialect: new PostgresJSDialect({
-    options: {
+    postgres: postgres({
       database: 'test',
       host: 'localhost',
       max: 10,
       port: 5434,
       user: 'admin',
-    },
-    postgres,
+    }),
   }),
 })
 ```

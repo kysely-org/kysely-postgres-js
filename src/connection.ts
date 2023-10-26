@@ -1,12 +1,11 @@
 import {CompiledQuery, DatabaseConnection, QueryResult, TransactionSettings} from 'kysely'
-import type {Sql} from 'postgres'
-
+import type {ReservedSql} from 'postgres'
 import {PostgresJSDialectError} from './errors.js'
 
 export class PostgresJSConnection implements DatabaseConnection {
-  #reservedConnection: PostgresJSReservedConnection
+  #reservedConnection: ReservedSql
 
-  constructor(reservedConnection: PostgresJSReservedConnection) {
+  constructor(reservedConnection: ReservedSql) {
     this.#reservedConnection = reservedConnection
   }
 
@@ -67,8 +66,4 @@ export class PostgresJSConnection implements DatabaseConnection {
       yield {rows}
     }
   }
-}
-
-interface PostgresJSReservedConnection extends Sql {
-  release(): void
 }

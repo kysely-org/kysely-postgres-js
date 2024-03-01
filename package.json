@@ -50,7 +50,7 @@
     "@typescript-eslint/parser": "^7.1.0",
     "chai": "^4.3.7",
     "chai-subset": "^1.6.0",
-    "esbuild": "^0.17.15",
+    "esbuild": "^0.20.1",
     "esbuild-runner": "^2.2.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -63,7 +63,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-organize-imports": "^3.2.4",
     "prettier-plugin-pkg": "^0.18.1",
-    "tsup": "^6.7.0",
+    "tsup": "^8.0.2",
     "typescript": "^5.3.3"
   },
   "sideEffects": false

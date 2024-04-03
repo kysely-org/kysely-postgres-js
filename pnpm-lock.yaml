@@ -64,7 +64,7 @@ devDependencies:
     version: 2.0.1
   postgres:
     specifier: ^3.4.3
-    version: 3.4.3
+    version: 3.4.4
   prettier:
     specifier: ^3.2.5
     version: 3.2.5
@@ -2521,8 +2521,8 @@ packages:
       yaml: 2.4.0
     dev: true
 
-  /postgres@3.4.3:
-    resolution: {integrity: sha512-iHJn4+M9vbTdHSdDzNkC0crHq+1CUdFhx+YqCE+SqWxPjm+Zu63jq7yZborOBF64c8pc58O5uMudyL1FQcHacA==}
+  /postgres@3.4.4:
+    resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
     engines: {node: '>=12'}
     dev: true
 

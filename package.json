@@ -41,7 +41,7 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
     "@types/chai": "^4.3.12",
-    "@types/chai-subset": "^1.3.3",
+    "@types/chai-subset": "^1.3.5",
     "@types/mocha": "^10.0.6",
     "@types/mocha-each": "^2.0.4",
     "@types/node": "^20.11.24",

@@ -12,3 +12,7 @@ updates:
     reviewers:
       - "igalklebanov"
     versioning-strategy: increase
+    groups:
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint*"

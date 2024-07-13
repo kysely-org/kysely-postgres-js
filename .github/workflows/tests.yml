@@ -10,39 +10,26 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x, 18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
       fail-fast: false
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run docker compose
-        run: docker-compose up -d
-
-      - name: Install Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
+        run: docker compose up -d
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
-          run_install: false
+          version: 9
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm i
@@ -58,31 +45,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
+        uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.2
+        uses: pnpm/action-setup@v4
         with:
-          version: 8
-          run_install: false
+          version: 9
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        run: |
-          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
+      - name: Install Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm i

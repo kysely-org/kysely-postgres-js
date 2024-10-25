@@ -60,7 +60,7 @@
     "kysely": "^0.27.4",
     "mocha": "^10.7.3",
     "mocha-each": "^2.0.1",
-    "postgres": "^3.4.3",
+    "postgres": "^3.4.5",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-pkg": "^0.18.1",

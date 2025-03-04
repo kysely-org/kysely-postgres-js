@@ -57,7 +57,7 @@
     "eslint-config-prettier": "^10.0.2",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
-    "kysely": "^0.27.5",
+    "kysely": "^0.27.6",
     "mocha": "^11.1.0",
     "mocha-each": "^2.0.1",
     "postgres": "^3.4.5",

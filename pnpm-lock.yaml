@@ -75,8 +75,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0(prettier@3.5.3)(typescript@5.8.2)
       prettier-plugin-pkg:
-        specifier: ^0.18.1
-        version: 0.18.1(prettier@3.5.3)
+        specifier: ^0.19.0
+        version: 0.19.0(prettier@3.5.3)
       tsup:
         specifier: ^8.4.0
         version: 8.4.0(typescript@5.8.2)
@@ -1391,8 +1391,8 @@ packages:
       vue-tsc:
         optional: true
 
-  prettier-plugin-pkg@0.18.1:
-    resolution: {integrity: sha512-FuUxvsYZR/8rsLH8s/jbPQmgYvv0yxW8LoIHCy6+Q7p4FBjjdP3DNKx8fMTOsc0SlEB1skB4o1LcahRceIh87A==}
+  prettier-plugin-pkg@0.19.0:
+    resolution: {integrity: sha512-wlBvVhAZQ+iOH8/4gWc1SxJbf5++xwKmnFkqHYUsmoQIg6hgdyL1055Z9FOWa6cumqL/QwqdOzY9aH4McdjKyw==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
       prettier: ^3.0.3
@@ -3037,7 +3037,7 @@ snapshots:
       prettier: 3.5.3
       typescript: 5.8.2
 
-  prettier-plugin-pkg@0.18.1(prettier@3.5.3):
+  prettier-plugin-pkg@0.19.0(prettier@3.5.3):
     dependencies:
       prettier: 3.5.3
 

@@ -57,8 +57,8 @@ importers:
         specifier: ^5.2.6
         version: 5.2.6(eslint-config-prettier@10.1.2(eslint@8.57.1))(eslint@8.57.1)(prettier@3.5.3)
       kysely:
-        specifier: ^0.28.0
-        version: 0.28.0
+        specifier: ^0.28.1
+        version: 0.28.1
       mocha:
         specifier: ^11.1.0
         version: 11.1.0
@@ -1175,8 +1175,8 @@ packages:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
     hasBin: true
 
-  kysely@0.28.0:
-    resolution: {integrity: sha512-hq8VcLy57Ww7oPTTVEOrT9ml+g8ehbbmEUkHmW4Xtubu+NHdKZi6SH6egmD4cjDhn3b/0s0h/6AjdPayOTJhNw==}
+  kysely@0.28.1:
+    resolution: {integrity: sha512-umkhsHB0y2JvI83DUtuYYTfvr063xTHTcr/k1z0E2Bg39zGiBcdDvlbP79YMcItn55pKQtD120sZmKa9jhCVtw==}
     engines: {node: '>=18.0.0'}
 
   levn@0.4.1:
@@ -2842,7 +2842,7 @@ snapshots:
     dependencies:
       minimist: 1.2.8
 
-  kysely@0.28.0: {}
+  kysely@0.28.1: {}
 
   levn@0.4.1:
     dependencies:

@@ -66,8 +66,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       postgres:
-        specifier: ^3.4.5
-        version: 3.4.5
+        specifier: ^3.4.6
+        version: 3.4.6
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -1386,8 +1386,8 @@ packages:
       yaml:
         optional: true
 
-  postgres@3.4.5:
-    resolution: {integrity: sha512-cDWgoah1Gez9rN3H4165peY9qfpEo+SA61oQv65O3cRUE1pOEoJWwddwcqKE8XZYjbblOJlYDlLV4h67HrEVDg==}
+  postgres@3.4.6:
+    resolution: {integrity: sha512-MXrZVqgUfiirfZ0MqQqXqZQa6oM5OWFjfuaHVKl7v2zW25LnOJeLpQk+UUW0ZuP94fcS+fZVqyDYm9v5SIJ11Q==}
     engines: {node: '>=12'}
 
   prelude-ls@1.2.1:
@@ -3051,7 +3051,7 @@ snapshots:
     dependencies:
       lilconfig: 3.1.3
 
-  postgres@3.4.5: {}
+  postgres@3.4.6: {}
 
   prelude-ls@1.2.1: {}
 

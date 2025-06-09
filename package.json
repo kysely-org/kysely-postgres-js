@@ -63,7 +63,7 @@
     "postgres": "^3.4.7",
     "prettier": "^3.5.3",
     "prettier-plugin-organize-imports": "^4.1.0",
-    "prettier-plugin-pkg": "^0.20.0",
+    "prettier-plugin-pkg": "^0.21.1",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },

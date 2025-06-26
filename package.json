@@ -61,7 +61,7 @@
     "mocha": "^11.7.1",
     "mocha-each": "^2.0.1",
     "postgres": "^3.4.7",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.1",
     "prettier-plugin-organize-imports": "^4.1.0",
     "prettier-plugin-pkg": "^0.21.1",
     "tsup": "^8.5.0",

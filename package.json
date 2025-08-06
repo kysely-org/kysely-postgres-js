@@ -65,7 +65,7 @@
     "prettier-plugin-organize-imports": "^4.2.0",
     "prettier-plugin-pkg": "^0.21.2",
     "tsup": "^8.5.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "sideEffects": false
 }

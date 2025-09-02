@@ -179,5 +179,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 				}
 			`)
 		})
+
+		// TODO: test streaming.
 	})
 }

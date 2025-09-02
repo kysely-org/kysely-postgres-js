@@ -52,7 +52,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			expect(result).toMatchInlineSnapshot(`
 				InsertResult {
 				  "insertId": undefined,
-				  "numInsertedOrUpdatedRows": 0n,
+				  "numInsertedOrUpdatedRows": 1n,
 				}
 			`)
 		})
@@ -81,7 +81,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			expect(result).toMatchInlineSnapshot(`
 				UpdateResult {
 				  "numChangedRows": undefined,
-				  "numUpdatedRows": 0n,
+				  "numUpdatedRows": 1n,
 				}
 			`)
 		})
@@ -109,7 +109,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 			expect(result).toMatchInlineSnapshot(`
 				DeleteResult {
-				  "numDeletedRows": 0n,
+				  "numDeletedRows": 1n,
 				}
 			`)
 		})
@@ -148,7 +148,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 			expect(result).toMatchInlineSnapshot(`
 				MergeResult {
-				  "numChangedRows": undefined,
+				  "numChangedRows": 2n,
 				}
 			`)
 		})

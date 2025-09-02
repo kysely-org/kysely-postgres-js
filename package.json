@@ -2,18 +2,26 @@
   "name": "kysely-postgres-js",
   "version": "2.0.0",
   "description": "Kysely dialect for PostgreSQL using the Postgres.js client",
+  "type": "module",
   "repository": "https://github.com/igalklebanov/kysely-postgres-js.git",
-  "homepage": "https://github.com/igalklebanov/kysely-postgres-js",
-  "author": "Igal Klebanov <igalklebanov@gmail.com>",
+  "homepage": "https://kysely.dev",
+  "author": "Igal Klebanov <igalklebanov@gmail.com> (https://github.com/igalklebanov)",
   "license": "MIT",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
-    }
-  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
   "files": [
     "dist"
   ],
@@ -33,14 +41,21 @@
     "node"
   ],
   "scripts": {
+    "biome": "biome",
     "build": "tsup",
-    "check:types": "tsc --noEmit"
+    "check:exports": "attw . --pack",
+    "check:types": "tsc --noEmit",
+    "prepublishOnly": "biome check && pnpm build && pnpm check:exports",
+    "test": "vitest"
   },
   "peerDependencies": {
     "kysely": ">= 0.24.0 < 1",
-    "postgres": ">= 3.4.0 < 4"
+    "postgres": "^3.4.0"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@biomejs/biome": "^2.2.2",
+    "@tsconfig/node24": "^24.0.1",
     "@types/node": "^24.3.0",
     "kysely": "^0.28.5",
     "postgres": "^3.4.7",

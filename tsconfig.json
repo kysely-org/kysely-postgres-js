@@ -1,8 +1,5 @@
 {
-  "extends": "@tsconfig/node20/tsconfig.json",
-  "compilerOptions": {
-    "rootDir": "src"
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "tests", "examples", "scripts", "assets"]
+	"extends": "./tsconfig.base.json",
+	"exclude": ["node_modules", "dist"],
+	"include": ["src", "tests", "scripts"]
 }

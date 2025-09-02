@@ -51,7 +51,7 @@ export class PostgresJSDriver implements Driver {
 }
 
 class PostgresJSConnection implements DatabaseConnection {
-	#reservedConnection: ReservedSql | undefined
+	readonly #reservedConnection: ReservedSql
 
 	constructor(reservedConnection: ReservedSql) {
 		this.#reservedConnection = reservedConnection
@@ -76,7 +76,7 @@ class PostgresJSConnection implements DatabaseConnection {
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
-		const result = await this.#reservedConnection!.unsafe<R[]>(
+		const result = await this.#reservedConnection.unsafe<R[]>(
 			compiledQuery.sql,
 			[...compiledQuery.parameters] as never,
 		)
@@ -93,8 +93,7 @@ class PostgresJSConnection implements DatabaseConnection {
 	}
 
 	releaseConnection(): void {
-		this.#reservedConnection?.release()
-		this.#reservedConnection = undefined
+		this.#reservedConnection.release()
 	}
 
 	async rollbackTransaction(): Promise<void> {
@@ -109,10 +108,9 @@ class PostgresJSConnection implements DatabaseConnection {
 			throw new PostgresJSDialectError('chunkSize must be a positive integer')
 		}
 
-		const cursor = this.#reservedConnection!.unsafe<R[]>(
-			compiledQuery.sql,
-			compiledQuery.parameters.slice() as any,
-		).cursor(chunkSize)
+		const cursor = this.#reservedConnection
+			.unsafe<R[]>(compiledQuery.sql, [...compiledQuery.parameters] as never)
+			.cursor(chunkSize)
 
 		for await (const rows of cursor) {
 			yield { rows }

@@ -7,7 +7,7 @@ import {
 } from './test-setup.mjs'
 
 for (const dialect of SUPPORTED_DIALECTS) {
-	describe(`neon: ${dialect}`, () => {
+	describe(`postgres.js: ${dialect}`, () => {
 		let ctx: TestContext
 
 		beforeAll(async () => {

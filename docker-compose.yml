@@ -1,11 +1,20 @@
-version: '3'
-
 services:
   postgres:
-    image: 'postgres'
-    environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: admin
-      POSTGRES_HOST_AUTH_METHOD: trust
+    image: postgres:17
+    command: "-d 1"
+    volumes:
+      - db_data:/var/lib/postgresql/data
     ports:
-      - '5434:5432'
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=main
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+    healthcheck:
+      interval: 10s
+      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      timeout: 5s
+
+volumes:
+  db_data:

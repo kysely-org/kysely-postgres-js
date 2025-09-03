@@ -2,6 +2,7 @@ import {
 	CompiledQuery,
 	type DatabaseConnection,
 	type Driver,
+	type QueryCompiler,
 	type QueryResult,
 	type TransactionSettings,
 } from 'kysely'
@@ -38,23 +39,47 @@ export class PostgresJSDriver implements Driver {
 		await connection.commitTransaction()
 	}
 
+	async destroy(): Promise<void> {
+		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
+		await this.#postgres!.end()
+	}
+
 	async init(): Promise<void> {
 		const { postgres } = this.#config
 
 		this.#postgres = isPostgresJSSql(postgres) ? postgres : await postgres()
 	}
 
-	async rollbackTransaction(connection: PostgresJSConnection): Promise<void> {
-		await connection.rollbackTransaction()
-	}
-
 	async releaseConnection(connection: PostgresJSConnection): Promise<void> {
 		connection.releaseConnection()
 	}
 
-	async destroy(): Promise<void> {
-		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
-		await this.#postgres!.end()
+	releaseSavepoint(
+		connection: DatabaseConnection,
+		savepointName: string,
+		compileQuery: QueryCompiler['compileQuery'],
+	): Promise<void> {
+		// TODO: ...
+	}
+
+	rollbackToSavepoint(
+		connection: DatabaseConnection,
+		savepointName: string,
+		compileQuery: QueryCompiler['compileQuery'],
+	): Promise<void> {
+		// TODO: ...
+	}
+
+	async rollbackTransaction(connection: PostgresJSConnection): Promise<void> {
+		await connection.rollbackTransaction()
+	}
+
+	savepoint(
+		connection: DatabaseConnection,
+		savepointName: string,
+		compileQuery: QueryCompiler['compileQuery'],
+	): Promise<void> {
+		// TODO: ...
 	}
 }
 

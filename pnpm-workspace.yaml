@@ -3,3 +3,6 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+overrides:
+  tinypool: 2.x # fixes vitest <-> bun errors, while waiting on vitest v4.

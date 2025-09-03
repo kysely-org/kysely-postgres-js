@@ -46,7 +46,9 @@
     "check:exports": "attw . --pack",
     "check:types": "tsc --noEmit",
     "prepublishOnly": "biome check && pnpm build && pnpm check:exports",
-    "test": "vitest"
+    "test": "pnpm test:node --run && pnpm test:bun --run",
+    "test:bun": "bun --bun vitest",
+    "test:node": "vitest"
   },
   "peerDependencies": {
     "kysely": ">= 0.24.0 < 1",
@@ -56,6 +58,7 @@
     "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^2.2.2",
     "@tsconfig/node24": "^24.0.1",
+    "@types/bun": "^1.2.21",
     "@types/node": "^24.3.0",
     "kysely": "^0.28.5",
     "postgres": "^3.4.7",

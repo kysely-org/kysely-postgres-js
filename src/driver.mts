@@ -122,9 +122,17 @@ class PostgresJSConnection implements DatabaseConnection {
 			throw new PostgresJSDialectError('chunkSize must be a positive integer')
 		}
 
-		const cursor = this.#reservedConnection
-			.unsafe(compiledQuery.sql, [...compiledQuery.parameters])
-			.cursor(chunkSize)
+		const query = this.#reservedConnection.unsafe(compiledQuery.sql, [
+			...compiledQuery.parameters,
+		])
+
+		if (typeof query.cursor !== 'function') {
+			throw new Error(
+				'PostgresJSDialect detected the instance you passed to it does not support streaming.',
+			)
+		}
+
+		const cursor = query.cursor(chunkSize)
 
 		for await (const rows of cursor) {
 			yield { rows }

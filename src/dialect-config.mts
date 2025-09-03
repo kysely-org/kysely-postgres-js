@@ -24,7 +24,7 @@ interface PostgresJSPendingQuery
 	// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.
 	extends Promise<any[] & Iterable<any> & PostgresJSResultQueryMeta> {
 	// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.
-	cursor: (rows?: number) => AsyncIterable<any[]>
+	cursor?: (rows?: number) => AsyncIterable<any[]>
 	// | ((rows: number, cb: (rows: any[]) => void) => Promise<ExecutionResult>)
 	// | ((cb: (row: [any]) => void) => Promise<ExecutionResult>)
 }

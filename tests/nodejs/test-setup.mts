@@ -1,5 +1,6 @@
 import { type Generated, Kysely } from 'kysely'
 import postgres from 'postgres'
+import { isBun } from 'std-env'
 
 import { PostgresJSDialect } from '../..'
 
@@ -12,6 +13,12 @@ const DIALECTS = {
 				onnotice() {},
 			}),
 	}),
+	bun: isBun
+		? new PostgresJSDialect({
+				postgres: () =>
+					import('bun').then((mod) => new mod.SQL(CONNECTION_STRING)),
+			})
+		: undefined,
 } as const
 
 export const SUPPORTED_DIALECTS = Object.keys(
@@ -32,7 +39,8 @@ export interface Database {
 export async function initTest(
 	dialect: keyof typeof DIALECTS,
 ): Promise<TestContext> {
-	return { db: new Kysely({ dialect: DIALECTS[dialect] }) }
+	// biome-ignore lint/style/noNonNullAssertion: we will handle it elsewhere.
+	return { db: new Kysely({ dialect: DIALECTS[dialect]! }) }
 }
 
 export async function resetState(): Promise<void> {

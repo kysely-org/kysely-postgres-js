@@ -54,6 +54,11 @@
     "kysely": ">= 0.24.0 < 1",
     "postgres": "^3.4.0"
   },
+  "peerDependenciesMeta": {
+    "postgres": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^2.2.2",

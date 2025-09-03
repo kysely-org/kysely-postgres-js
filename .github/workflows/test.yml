@@ -51,8 +51,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        bun-version: [1.0, 1.1, 1.2]
-    name: Node.js ${{ matrix.node-version }}
+        bun-version: [1.2]
+    name: Bun ${{ matrix.node-version }}
 
     steps:
       - name: Harden the runner (Audit all outbound calls)

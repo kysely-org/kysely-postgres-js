@@ -2,7 +2,7 @@ import { type Generated, Kysely } from 'kysely'
 import postgres from 'postgres'
 import { isBun } from 'std-env'
 
-import { PostgresJSDialect } from '../..'
+import { PostgresJSDialect } from '..'
 
 const CONNECTION_STRING = 'postgres://postgres:postgres@localhost:5432/main'
 

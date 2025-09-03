@@ -1,57 +1,55 @@
-# kysely-postgres-js
+![A Kysely-branded yellow duck canoeing with a Postgres.js-branded grey elephant in the river](./assets/banner.png)
 
-![Powered by TypeScript](https://img.shields.io/badge/powered%20by-typescript-blue.svg)
+[![NPM Version](https://img.shields.io/npm/v/kysely-postgres-js?style=flat&label=latest)](https://github.com/kysely-org/kysely-postgres-js/releases/latest)
+[![Tests](https://github.com/kysely-org/kysely-postgres-js/actions/workflows/test.yml/badge.svg)](https://github.com/kysely-org/kysely-postgres-js)
+[![License](https://img.shields.io/github/license/kysely-org/kysely-postgres-js?style=flat)](https://github.com/kysely-org/kysely-postgres-js/blob/main/LICENSE)
+[![Issues](https://img.shields.io/github/issues-closed/kysely-org/kysely-postgres-js?logo=github)](https://github.com/kysely-org/kysely-postgres-js/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc)
+[![Pull Requests](https://img.shields.io/github/issues-pr-closed/kysely-org/kysely-postgres-js?label=PRs&logo=github&style=flat)](https://github.com/kysely-org/kysely-postgres-js/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc)
+![GitHub contributors](https://img.shields.io/github/contributors/kysely-org/kysely-postgres-js)
+[![Downloads](https://img.shields.io/npm/dw/kysely-postgres-js?logo=npm)](https://www.npmjs.com/package/kysely-postgres-js)
 
-[Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) using the [Postgres.js](https://github.com/porsager/postgres) client library under the hood (version >= 3.4).
+###### Join the discussion ⠀⠀⠀⠀⠀⠀⠀
 
-This dialect should not be confused with Kysely's built-in PostgreSQL dialect, which uses the [pg](https://github.com/brianc/node-postgres) client library instead.
+[![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=flat&logo=discord&logoColor=white)](https://discord.gg/xyBJ3GwvAm)
+[![Bluesky](https://img.shields.io/badge/Bluesky-0285FF?style=flat&logo=Bluesky&logoColor=white)](https://bsky.app/profile/kysely.dev)
+
+`kysely-postgres-js` offers a [Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) that supports the [Postgres.js](https://github.com/porsager/postgres) client library (version >= 3.4) and [Bun](https://bun.com/)'s (version >= 1.2) [SQL](https://bun.com/docs/api/sql) native binding.
+
+This dialect should not be confused with [Kysely](https://github.com/koskimas/kysely)'s core [PostgreSQL](https://www.postgresql.org/) dialect, which supports the significantly more adopted [pg](https://github.com/brianc/node-postgres) client library and [Neon](https://neon.com)'s WebSockets [Pool](https://neon.com/docs/serverless/serverless-driver#use-the-driver-over-websockets) instead. Both of these dialects are maintained by members of the [Kysely](https://github.com/koskimas/kysely) core team and are production ready.
 
 ## Installation
 
-#### NPM 7+
+### Node.js
 
 ```bash
-npm i kysely-postgres-js
+npm install kysely-postgres-js postgres kysely
 ```
-
-#### NPM <7
 
 ```bash
-npm i kysely-postgres-js kysely postgres
+pnpm add kysely-postgres-js postgres kysely
 ```
-
-#### Yarn
 
 ```bash
-yarn add kysely-postgres-js kysely postgres
+yarn add kysely-postgres-js postgres kysely
 ```
 
-#### PNPM
+### Other runtimes
 
 ```bash
-pnpm add kysely-postgres-js kysely postgres
+deno add npm:kysely-postgres-js npm:postgres npm:kysely
 ```
 
-### Deno
-
-This package uses/extends some [Kysely](https://github.com/koskimas/kysely) types and classes, which are imported using its NPM package name -- not a relative file path or CDN url. It also uses [Postgres.js] which is imported using its NPM package name -- not a relative file path or CDN url.
-
-To fix that, add an [`import_map.json`](https://deno.land/manual@v1.26.1/linking_to_external_code/import_maps) file.
-
-```json
-{
-  "imports": {
-    "kysely": "https://cdn.jsdelivr.net/npm/kysely@0.27.2/dist/esm/index.js",
-    "postgres": "https://deno.land/x/postgresjs@v3.4.3/mod.js"
-  }
-}
+```bash
+bun add kysely-postgres-js kysely
 ```
 
 ## Usage
 
+### Node.js
+
 ```ts
-import {type GeneratedAlways, Kysely} from 'kysely'
-import {PostgresJSDialect} from 'kysely-postgres-js'
+import { type GeneratedAlways, Kysely } from 'kysely'
+import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
 
 interface Database {
@@ -74,8 +72,37 @@ const db = new Kysely<Database>({
     }),
   }),
 })
+
+const people = await db.selectFrom("person").selectAll().execute();
 ```
 
-## License
+### Bun
 
-MIT License, see `LICENSE`
+```ts
+import { SQL } from 'bun'
+import { type GeneratedAlways, Kysely } from 'kysely'
+import { PostgresJSDialect } from 'kysely-postgres-js'
+
+interface Database {
+  person: {
+    id: GeneratedAlways<number>
+    first_name: string | null
+    last_name: string | null
+    age: number
+  }
+}
+
+const db = new Kysely<Database>({
+  dialect: new PostgresJSDialect({
+    postgres: new SQL({
+      database: 'test',
+      host: 'localhost',
+      max: 10,
+      port: 5434,
+      user: 'admin',
+    }),
+  }),
+})
+
+const people = await db.selectFrom("person").selectAll().execute();
+```

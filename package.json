@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "Kysely dialect for PostgreSQL using the Postgres.js client",
   "type": "module",
-  "repository": "https://github.com/igalklebanov/kysely-postgres-js.git",
+  "repository": "git://github.com/igalklebanov/kysely-postgres-js.git",
   "homepage": "https://kysely.dev",
   "author": "Igal Klebanov <igalklebanov@gmail.com> (https://github.com/igalklebanov)",
   "license": "MIT",

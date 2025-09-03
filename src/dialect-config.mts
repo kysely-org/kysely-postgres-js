@@ -1,4 +1,14 @@
+import type { DatabaseConnection } from 'kysely'
+
 export interface PostgresJSDialectConfig {
+	/**
+	 * Called every time a connection is acquired from the pool.
+	 */
+	onReserveConnection?: (connection: DatabaseConnection) => Promise<void>
+
+	/**
+	 * An instance, or a factory returning an instance, of `postgres`'s `Sql` (returned by `postgres(...)`) or Bun's `SQL` class.
+	 */
 	readonly postgres:
 		| PostgresJSSql
 		| (() => PostgresJSSql | Promise<PostgresJSSql>)

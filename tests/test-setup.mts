@@ -2,28 +2,34 @@ import { type Generated, Kysely } from 'kysely'
 import postgres from 'postgres'
 import { isBun } from 'std-env'
 
-import { PostgresJSDialect } from '..'
+import { PostgresJSDialect, type PostgresJSDialectConfig } from '..'
 
 const CONNECTION_STRING = 'postgres://postgres:postgres@localhost:5432/main'
 
-const DIALECTS = {
-	v3: new PostgresJSDialect({
-		postgres: () =>
-			postgres(CONNECTION_STRING, {
-				onnotice() {},
-			}),
-	}),
-	bun: isBun
-		? new PostgresJSDialect({
-				postgres: () =>
-					import('bun').then((mod) => new mod.SQL(CONNECTION_STRING)),
-			})
-		: undefined,
-} as const
+export const SUPPORTED_DIALECTS = ['v3', 'bun'] as const
 
-export const SUPPORTED_DIALECTS = Object.keys(
-	DIALECTS,
-) as (keyof typeof DIALECTS)[]
+const getDialect = (
+	dialect: (typeof SUPPORTED_DIALECTS)[number],
+	config?: Omit<PostgresJSDialectConfig, 'postgres'>,
+) =>
+	(
+		({
+			bun: isBun
+				? new PostgresJSDialect({
+						...config,
+						postgres: () =>
+							import('bun').then((mod) => new mod.SQL(CONNECTION_STRING)),
+					})
+				: undefined,
+			v3: new PostgresJSDialect({
+				...config,
+				postgres: () =>
+					postgres(CONNECTION_STRING, {
+						onnotice() {},
+					}),
+			}),
+		}) as const
+	)[dialect]
 
 export interface TestContext {
 	db: Kysely<Database>
@@ -37,10 +43,11 @@ export interface Database {
 }
 
 export async function initTest(
-	dialect: keyof typeof DIALECTS,
+	dialect: (typeof SUPPORTED_DIALECTS)[number],
+	config?: Omit<PostgresJSDialectConfig, 'postgres'>,
 ): Promise<TestContext> {
 	// biome-ignore lint/style/noNonNullAssertion: we will handle it elsewhere.
-	return { db: new Kysely({ dialect: DIALECTS[dialect]! }) }
+	return { db: new Kysely({ dialect: getDialect(dialect, config)! }) }
 }
 
 export async function resetState(): Promise<void> {

@@ -26,7 +26,11 @@ export class PostgresJSDriver extends PostgresDriver {
 		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
 		const reservedConnection = await this.#postgres!.reserve()
 
-		return new PostgresJSConnection(reservedConnection)
+		const connection = new PostgresJSConnection(reservedConnection)
+
+		await this.#config.onReserveConnection?.(connection)
+
+		return connection
 	}
 
 	override async destroy(): Promise<void> {

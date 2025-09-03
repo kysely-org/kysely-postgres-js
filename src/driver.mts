@@ -1,10 +1,8 @@
 import {
-	CompiledQuery,
+	type CompiledQuery,
 	type DatabaseConnection,
-	type Driver,
-	type QueryCompiler,
+	PostgresDriver,
 	type QueryResult,
-	type TransactionSettings,
 } from 'kysely'
 import type {
 	PostgresJSDialectConfig,
@@ -13,73 +11,39 @@ import type {
 } from './dialect-config.mjs'
 import { freeze } from './utils.mjs'
 
-export class PostgresJSDriver implements Driver {
+const RELEASE_CONNECTION_SYMBOL = Symbol('release')
+
+export class PostgresJSDriver extends PostgresDriver {
 	readonly #config: PostgresJSDialectConfig
 	#postgres: PostgresJSSql | undefined
 
 	constructor(config: PostgresJSDialectConfig) {
+		super({} as never)
 		this.#config = freeze({ ...config })
 	}
 
-	async acquireConnection(): Promise<PostgresJSConnection> {
+	override async acquireConnection(): Promise<PostgresJSConnection> {
 		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
 		const reservedConnection = await this.#postgres!.reserve()
 
 		return new PostgresJSConnection(reservedConnection)
 	}
 
-	async beginTransaction(
-		connection: PostgresJSConnection,
-		settings: TransactionSettings,
-	): Promise<void> {
-		await connection.beginTransaction(settings)
-	}
-
-	async commitTransaction(connection: PostgresJSConnection): Promise<void> {
-		await connection.commitTransaction()
-	}
-
-	async destroy(): Promise<void> {
+	override async destroy(): Promise<void> {
 		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
 		await this.#postgres!.end()
 	}
 
-	async init(): Promise<void> {
+	override async init(): Promise<void> {
 		const { postgres } = this.#config
 
 		this.#postgres = isPostgresJSSql(postgres) ? postgres : await postgres()
 	}
 
-	async releaseConnection(connection: PostgresJSConnection): Promise<void> {
-		connection.releaseConnection()
-	}
-
-	releaseSavepoint(
+	override async releaseConnection(
 		connection: DatabaseConnection,
-		savepointName: string,
-		compileQuery: QueryCompiler['compileQuery'],
 	): Promise<void> {
-		// TODO: ...
-	}
-
-	rollbackToSavepoint(
-		connection: DatabaseConnection,
-		savepointName: string,
-		compileQuery: QueryCompiler['compileQuery'],
-	): Promise<void> {
-		// TODO: ...
-	}
-
-	async rollbackTransaction(connection: PostgresJSConnection): Promise<void> {
-		await connection.rollbackTransaction()
-	}
-
-	savepoint(
-		connection: DatabaseConnection,
-		savepointName: string,
-		compileQuery: QueryCompiler['compileQuery'],
-	): Promise<void> {
-		// TODO: ...
+		;(connection as PostgresJSConnection)[RELEASE_CONNECTION_SYMBOL]()
 	}
 }
 
@@ -92,22 +56,6 @@ class PostgresJSConnection implements DatabaseConnection {
 
 	constructor(reservedConnection: PostgresJSReservedSql) {
 		this.#reservedConnection = reservedConnection
-	}
-
-	async beginTransaction(settings: TransactionSettings): Promise<void> {
-		const { isolationLevel } = settings
-
-		const compiledQuery = CompiledQuery.raw(
-			isolationLevel
-				? `start transaction isolation level ${isolationLevel}`
-				: 'begin',
-		)
-
-		await this.executeQuery(compiledQuery)
-	}
-
-	async commitTransaction(): Promise<void> {
-		await this.executeQuery(CompiledQuery.raw('commit'))
 	}
 
 	async executeQuery<R>(
@@ -129,14 +77,6 @@ class PostgresJSConnection implements DatabaseConnection {
 					: undefined,
 			rows: Array.from(result.values()),
 		}
-	}
-
-	releaseConnection(): void {
-		this.#reservedConnection.release()
-	}
-
-	async rollbackTransaction(): Promise<void> {
-		await this.executeQuery(CompiledQuery.raw('rollback'))
 	}
 
 	async *streamQuery<R>(
@@ -162,6 +102,10 @@ class PostgresJSConnection implements DatabaseConnection {
 		for await (const rows of cursor) {
 			yield { rows }
 		}
+	}
+
+	[RELEASE_CONNECTION_SYMBOL](): void {
+		this.#reservedConnection.release()
 	}
 }
 

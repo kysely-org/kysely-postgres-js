@@ -51,11 +51,11 @@ export class PostgresJSDriver extends PostgresDriver {
 	}
 }
 
-function isPostgresJSSql(thing: unknown): thing is PostgresJSSql {
+export function isPostgresJSSql(thing: unknown): thing is PostgresJSSql {
 	return typeof thing === 'function' && 'reserve' in thing
 }
 
-class PostgresJSConnection implements DatabaseConnection {
+export class PostgresJSConnection implements DatabaseConnection {
 	readonly #reservedConnection: PostgresJSReservedSql
 
 	constructor(reservedConnection: PostgresJSReservedSql) {

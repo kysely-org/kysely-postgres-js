@@ -1,4 +1,5 @@
 import {
+	type AbortableOperationOptions,
 	type CompiledQuery,
 	type DatabaseConnection,
 	PostgresDriver,
@@ -6,6 +7,7 @@ import {
 } from 'kysely'
 import type {
 	PostgresJSDialectConfig,
+	PostgresJSPendingQuery,
 	PostgresJSReservedSql,
 	PostgresJSSql,
 } from './dialect-config.mjs'
@@ -22,30 +24,35 @@ export class PostgresJSDriver extends PostgresDriver {
 		this.#config = freeze({ ...config })
 	}
 
-	override async acquireConnection(): Promise<PostgresJSConnection> {
+	override async acquireConnection(
+		options?: AbortableOperationOptions,
+	): Promise<PostgresJSConnection> {
 		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
 		const reservedConnection = await this.#postgres!.reserve()
 
 		const connection = new PostgresJSConnection(reservedConnection)
 
-		await this.#config.onReserveConnection?.(connection)
+		await this.#config.onReserveConnection?.(connection, options)
 
 		return connection
 	}
 
-	override async destroy(): Promise<void> {
+	override async destroy(_options?: AbortableOperationOptions): Promise<void> {
 		// biome-ignore lint/style/noNonNullAssertion: `init` ran at this point.
 		await this.#postgres!.end()
 	}
 
-	override async init(): Promise<void> {
+	override async init(options?: AbortableOperationOptions): Promise<void> {
 		const { postgres } = this.#config
 
-		this.#postgres = isPostgresJSSql(postgres) ? postgres : await postgres()
+		this.#postgres = isPostgresJSSql(postgres)
+			? postgres
+			: await postgres(options)
 	}
 
 	override async releaseConnection(
 		connection: DatabaseConnection,
+		_options?: AbortableOperationOptions,
 	): Promise<void> {
 		;(connection as PostgresJSConnection)[RELEASE_CONNECTION_SYMBOL]()
 	}
@@ -57,29 +64,44 @@ function isPostgresJSSql(thing: unknown): thing is PostgresJSSql {
 
 class PostgresJSConnection implements DatabaseConnection {
 	readonly #reservedConnection: PostgresJSReservedSql
+	#pendingQuery: PostgresJSPendingQuery | undefined
 
 	constructor(reservedConnection: PostgresJSReservedSql) {
 		this.#reservedConnection = reservedConnection
 	}
 
+	async cancelQuery(): Promise<void> {
+		if (typeof this.#pendingQuery?.cancel === 'function') {
+			this.#pendingQuery.cancel()
+		}
+	}
+
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
-		const result = await this.#reservedConnection.unsafe(compiledQuery.sql, [
+		const pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
 			...compiledQuery.parameters,
 		])
 
-		const { command, count } = result
+		this.#pendingQuery = pendingQuery
 
-		return {
-			numAffectedRows:
-				command === 'INSERT' ||
-				command === 'UPDATE' ||
-				command === 'DELETE' ||
-				command === 'MERGE'
-					? BigInt(count)
-					: undefined,
-			rows: Array.from(result.values()),
+		try {
+			const result = await pendingQuery
+
+			const { command, count } = result
+
+			return {
+				numAffectedRows:
+					command === 'INSERT' ||
+					command === 'UPDATE' ||
+					command === 'DELETE' ||
+					command === 'MERGE'
+						? BigInt(count)
+						: undefined,
+				rows: Array.from(result.values()),
+			}
+		} finally {
+			this.#pendingQuery = undefined
 		}
 	}
 
@@ -101,10 +123,16 @@ class PostgresJSConnection implements DatabaseConnection {
 			)
 		}
 
+		this.#pendingQuery = query
+
 		const cursor = query.cursor(chunkSize)
 
-		for await (const rows of cursor) {
-			yield { rows }
+		try {
+			for await (const rows of cursor) {
+				yield { rows }
+			}
+		} finally {
+			this.#pendingQuery = undefined
 		}
 	}
 

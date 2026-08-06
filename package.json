@@ -51,7 +51,7 @@
     "test:node": "vitest"
   },
   "peerDependencies": {
-    "kysely": ">= 0.24.0 < 1",
+    "kysely": ">= 0.29.0 < 1",
     "postgres": "^3.4.0"
   },
   "peerDependenciesMeta": {
@@ -65,8 +65,8 @@
     "@tsconfig/node24": "^24.0.1",
     "@types/bun": "^1.2.21",
     "@types/node": "^24.3.0",
-    "kysely": "^0.28.5",
-    "postgres": "^3.4.7",
+    "kysely": "^0.29.4",
+    "postgres": "^3.4.9",
     "std-env": "^3.9.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",

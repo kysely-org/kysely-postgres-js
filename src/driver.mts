@@ -71,22 +71,18 @@ class PostgresJSConnection implements DatabaseConnection {
 	}
 
 	async cancelQuery(): Promise<void> {
-		if (typeof this.#pendingQuery?.cancel === 'function') {
-			this.#pendingQuery.cancel()
-		}
+		this.#pendingQuery?.cancel?.()
 	}
 
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
-		const pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
+		this.#pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
 			...compiledQuery.parameters,
 		])
 
-		this.#pendingQuery = pendingQuery
-
 		try {
-			const result = await pendingQuery
+			const result = await this.#pendingQuery
 
 			const { command, count } = result
 
@@ -113,19 +109,18 @@ class PostgresJSConnection implements DatabaseConnection {
 			throw new PostgresJSDialectError('chunkSize must be a positive integer')
 		}
 
-		const query = this.#reservedConnection.unsafe(compiledQuery.sql, [
+		this.#pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
 			...compiledQuery.parameters,
 		])
 
-		if (typeof query.cursor !== 'function') {
+		if (typeof this.#pendingQuery.cursor !== 'function') {
+			this.#pendingQuery = undefined
 			throw new Error(
 				'PostgresJSDialect detected the instance you passed to it does not support streaming.',
 			)
 		}
 
-		this.#pendingQuery = query
-
-		const cursor = query.cursor(chunkSize)
+		const cursor = this.#pendingQuery.cursor(chunkSize)
 
 		try {
 			for await (const rows of cursor) {

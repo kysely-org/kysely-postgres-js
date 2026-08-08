@@ -40,8 +40,10 @@ export interface PostgresJSPendingQuery
 	extends Promise<any[] & Iterable<any> & PostgresJSResultQueryMeta> {
 	/**
 	 * Cancels this pending query on the database side, if supported. Present on
-	 * both `postgres`'s pending queries and Bun's `SQL`, though as of Bun 1.3.1
-	 * it doesn't actually cancel the in-flight query server-side.
+	 * both `postgres`'s pending queries and Bun's `SQL`, though Bun
+	 * `SQL`'s pending query `.cancel()` doesn't actually cancel the in-flight
+	 * query server-side. Because of that, `PostgresJSConnection.cancelQuery`
+	 * throws instead of calling this when running on Bun, rather than being a no-op.
 	 */
 	cancel?: () => void
 	// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.

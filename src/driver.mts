@@ -62,6 +62,14 @@ function isPostgresJSSql(thing: unknown): thing is PostgresJSSql {
 	return typeof thing === 'function' && 'reserve' in thing
 }
 
+function isBunSql(thing: unknown): boolean {
+	return (
+		typeof thing === 'function' &&
+		// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.
+		typeof (thing as any).options?.adapter === 'string'
+	)
+}
+
 class PostgresJSConnection implements DatabaseConnection {
 	readonly #reservedConnection: PostgresJSReservedSql
 	#pendingQuery: PostgresJSPendingQuery | undefined
@@ -71,7 +79,17 @@ class PostgresJSConnection implements DatabaseConnection {
 	}
 
 	async cancelQuery(): Promise<void> {
-		this.#pendingQuery?.cancel?.()
+		if (!this.#pendingQuery) {
+			return
+		}
+
+		if (isBunSql(this.#reservedConnection)) {
+			throw new PostgresJSDialectError(
+				"Cancelling in-flight queries is not supported when running on Bun. Bun's `SQL` pending query `.cancel()` does not actually cancel the query on the database side.",
+			)
+		}
+
+		this.#pendingQuery.cancel?.()
 	}
 
 	async executeQuery<R>(

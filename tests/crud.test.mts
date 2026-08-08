@@ -1,6 +1,14 @@
 import { sql } from 'kysely'
 import { isBun } from 'std-env'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from 'vitest'
 import {
 	initTest,
 	resetState,
@@ -284,10 +292,6 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			expect(Date.now() - start).toBeLessThan(400)
 		})
 
-		// As of Bun 1.3.1, Bun's `SQL` pending query `.cancel()` doesn't
-		// actually cancel the in-flight query server-side (see the
-		// `PostgresJSPendingQuery.cancel` doc comment in dialect-config.mts),
-		// so the update below completes instead of being aborted.
 		it.skipIf(dialect === 'bun')(
 			"should cancel the query on the database side when inflightQueryAbortStrategy is 'cancel query'",
 			async () => {
@@ -315,6 +319,50 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			},
 		)
 
+		it.skipIf(dialect !== 'bun')(
+			"should throw, in the background, instead of silently no-op-ing when inflightQueryAbortStrategy is 'cancel query'",
+			async () => {
+				const consoleErrorSpy = vi
+					.spyOn(console, 'error')
+					.mockImplementation(() => {})
+
+				await expect(
+					sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
+						ctx.db,
+						{
+							signal: AbortSignal.timeout(50),
+							inflightQueryAbortStrategy: 'cancel query',
+						},
+					),
+				).rejects.toThrow()
+
+				// the background inflight-query-abort-handler failure is only
+				// reported asynchronously, after the execute() call above
+				// already rejected due to the abort signal.
+				await sleep(100)
+
+				expect(consoleErrorSpy).toHaveBeenCalledWith(
+					expect.stringContaining(
+						'Cancelling in-flight queries is not supported when running on Bun',
+					),
+				)
+
+				consoleErrorSpy.mockRestore()
+
+				// give the sleep plenty of time to finish, since Bun can't
+				// actually cancel it on the database side.
+				await sleep(700)
+
+				const person = await ctx.db
+					.selectFrom('person')
+					.select('name')
+					.where('id', '=', '48856ed4-9f1f-4111-ba7f-6092a1be96eb')
+					.executeTakeFirstOrThrow()
+
+				expect(person.name).toBe('cancelled')
+			},
+		)
+
 		it.skipIf(dialect === 'bun')(
 			'should stream normally when passed a non-aborted signal',
 			async () => {
@@ -333,7 +381,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			},
 		)
 
-		it.skipIf(dialect === 'bun')(
+		it(
 			'should reject immediately when streaming with an already aborted signal',
 			async () => {
 				const controller = new AbortController()

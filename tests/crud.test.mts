@@ -379,20 +379,17 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			},
 		)
 
-		it(
-			'should reject immediately when streaming with an already aborted signal',
-			async () => {
-				const controller = new AbortController()
-				const reason = new Error('aborted before streaming')
-				controller.abort(reason)
+		it('should reject immediately when streaming with an already aborted signal', async () => {
+			const controller = new AbortController()
+			const reason = new Error('aborted before streaming')
+			controller.abort(reason)
 
-				const iterator = ctx.db
-					.selectFrom('person')
-					.selectAll()
-					.stream({ signal: controller.signal })
+			const iterator = ctx.db
+				.selectFrom('person')
+				.selectAll()
+				.stream({ signal: controller.signal })
 
-				await expect(iterator.next()).rejects.toBe(reason)
-			},
-		)
+			await expect(iterator.next()).rejects.toBe(reason)
+		})
 	})
 }

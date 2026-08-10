@@ -269,6 +269,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			const controller = new AbortController()
 			const reason = new Error('aborted before execution')
 			controller.abort(reason)
+			vi.spyOn(console, 'error').mockImplementation(() => {})
 
 			await expect(
 				ctx.db
@@ -301,7 +302,14 @@ for (const dialect of SUPPORTED_DIALECTS) {
 							inflightQueryAbortStrategy: 'cancel query',
 						},
 					),
-				).rejects.toThrow()
+				).rejects.toSatisfy((error) => {
+					expect(error).toBeInstanceOf(DOMException)
+					expect(error).toMatchObject({
+						name: 'TimeoutError',
+						__kysely_timing__: 'during query execution',
+					})
+					return true
+				})
 
 				// give the sleep plenty of time to finish, in case the update
 				// wasn't actually cancelled on the database side.
@@ -332,7 +340,14 @@ for (const dialect of SUPPORTED_DIALECTS) {
 							inflightQueryAbortStrategy: 'cancel query',
 						},
 					),
-				).rejects.toThrow()
+				).rejects.toSatisfy((error) => {
+					expect(error).toBeInstanceOf(DOMException)
+					expect(error).toMatchObject({
+						name: 'TimeoutError',
+						message: 'The operation timed out.',
+					})
+					return true
+				})
 
 				// the background inflight-query-abort-handler failure is only
 				// reported asynchronously, after the execute() call above

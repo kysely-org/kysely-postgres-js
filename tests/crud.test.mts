@@ -1,3 +1,4 @@
+import { setTimeout } from 'node:timers/promises'
 import { sql } from 'kysely'
 import { isBun } from 'std-env'
 import {
@@ -15,9 +16,6 @@ import {
 	SUPPORTED_DIALECTS,
 	type TestContext,
 } from './test-setup.mjs'
-
-const sleep = (ms: number): Promise<void> =>
-	new Promise((resolve) => setTimeout(resolve, ms))
 
 for (const dialect of SUPPORTED_DIALECTS) {
 	describe.skipIf(dialect === 'bun' && !isBun)(dialect, () => {
@@ -307,7 +305,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 				// give the sleep plenty of time to finish, in case the update
 				// wasn't actually cancelled on the database side.
-				await sleep(700)
+				await setTimeout(700)
 
 				const person = await ctx.db
 					.selectFrom('person')
@@ -339,7 +337,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 				// the background inflight-query-abort-handler failure is only
 				// reported asynchronously, after the execute() call above
 				// already rejected due to the abort signal.
-				await sleep(100)
+				await setTimeout(100)
 
 				expect(consoleErrorSpy).toHaveBeenCalledWith(
 					expect.stringContaining(
@@ -351,7 +349,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 				// give the sleep plenty of time to finish, since Bun can't
 				// actually cancel it on the database side.
-				await sleep(700)
+				await setTimeout(700)
 
 				const person = await ctx.db
 					.selectFrom('person')

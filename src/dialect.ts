@@ -9,9 +9,9 @@ import {
 	PostgresQueryCompiler,
 	type QueryCompiler,
 } from 'kysely'
-import type { PostgresJSDialectConfig } from './dialect-config.mjs'
-import { PostgresJSDriver } from './driver.mjs'
-import { freeze } from './utils.mjs'
+import type { PostgresJSDialectConfig } from './dialect-config.js'
+import { PostgresJSDriver } from './driver.js'
+import { freeze } from './utils.js'
 
 export class PostgresJSDialect implements Dialect {
 	readonly #config: PostgresJSDialectConfig

@@ -6,23 +6,26 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directories: 
-      - /
-    schedule:
-      interval: daily
+    cooldown:
+      default-days: 1
+    directory: /
+    rebase-strategy: disabled
+    versioning-strategy: increase
     reviewers:
       - igalklebanov
-
-  # - package-ecosystem: bun
-  #   directory: /examples/bun
-  #   schedule:
-  #     interval: daily
-  #   reviewers:
-  #     - igalklebanov
+    schedule:
+      interval: daily
 
   - package-ecosystem: github-actions
+    cooldown:
+      default-days: 1
     directory: /
-    schedule:
-      interval: daily
+    groups:
+      codeql-action:
+        patterns:
+          - github/codeql-action*
+    rebase-strategy: disabled
     reviewers:
       - igalklebanov
+    schedule:
+      interval: daily

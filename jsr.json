@@ -1,0 +1,15 @@
+{
+	"$schema": "https://jsr.io/schema/config-file.v1.json",
+	"name": "@kysely/postgres",
+	"version": "3.0.0",
+	"license": "MIT",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"publish": {
+		"include": ["LICENSE", "README.md", "src/**/*.ts"]
+	},
+	"imports": {
+		"kysely": "jsr:@kysely/kysely@0.29.5"
+	}
+}

@@ -15,6 +15,7 @@ import {
 	resetState,
 	SUPPORTED_DIALECTS,
 	type TestContext,
+	timeoutSignal,
 } from './test-setup.js'
 
 for (const dialect of SUPPORTED_DIALECTS) {
@@ -284,7 +285,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 			await expect(
 				sql`select pg_sleep(0.5)`.execute(ctx.db, {
-					signal: AbortSignal.timeout(50),
+					signal: timeoutSignal(50),
 				}),
 			).rejects.toThrow()
 
@@ -298,7 +299,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
 						ctx.db,
 						{
-							signal: AbortSignal.timeout(50),
+							signal: timeoutSignal(50),
 							inflightQueryAbortStrategy: 'cancel query',
 						},
 					),
@@ -336,7 +337,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
 						ctx.db,
 						{
-							signal: AbortSignal.timeout(50),
+							signal: timeoutSignal(50),
 							inflightQueryAbortStrategy: 'cancel query',
 						},
 					),

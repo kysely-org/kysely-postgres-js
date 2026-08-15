@@ -50,6 +50,32 @@ export async function initTest(
 	return { db: new Kysely({ dialect: getDialect(dialect, config)! }) }
 }
 
+/**
+ * Bun >= 1.3.13 has a regression where an `AbortSignal.timeout` signal never
+ * aborts once all of its abort listeners have been removed - the backing timer
+ * is garbage-collected when the listener count drops to zero. Kysely adds and
+ * removes a listener per execution stage, so such signals die before the query
+ * stage. Signals backed by `AbortController` are unaffected, so we mimic
+ * `AbortSignal.timeout` with one on affected Bun versions.
+ */
+export function timeoutSignal(milliseconds: number): AbortSignal {
+	if (isBun && Bun.semver.satisfies(Bun.version, '>=1.3.13')) {
+		const controller = new AbortController()
+
+		setTimeout(
+			() =>
+				controller.abort(
+					new DOMException('The operation timed out.', 'TimeoutError'),
+				),
+			milliseconds,
+		)
+
+		return controller.signal
+	}
+
+	return AbortSignal.timeout(milliseconds)
+}
+
 export async function resetState(): Promise<void> {
 	const sql = postgres(CONNECTION_STRING, { max: 1 })
 

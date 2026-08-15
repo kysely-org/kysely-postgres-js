@@ -10,8 +10,8 @@ import type {
 	PostgresJSPendingQuery,
 	PostgresJSReservedSql,
 	PostgresJSSql,
-} from './dialect-config.mjs'
-import { freeze } from './utils.mjs'
+} from './dialect-config.js'
+import { freeze } from './utils.js'
 
 const RELEASE_CONNECTION_SYMBOL = Symbol('release')
 

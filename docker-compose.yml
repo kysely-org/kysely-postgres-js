@@ -1,9 +1,9 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     command: "-d 1"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql
     ports:
       - "5432:5432"
     environment:

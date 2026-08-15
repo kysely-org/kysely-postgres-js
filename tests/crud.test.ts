@@ -15,7 +15,7 @@ import {
 	resetState,
 	SUPPORTED_DIALECTS,
 	type TestContext,
-} from './test-setup.mjs'
+} from './test-setup.js'
 
 for (const dialect of SUPPORTED_DIALECTS) {
 	describe.skipIf(dialect === 'bun' && !isBun)(dialect, () => {

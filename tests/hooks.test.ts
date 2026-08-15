@@ -1,11 +1,7 @@
 import { sql } from 'kysely'
 import { isBun } from 'std-env'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-	initTest,
-	SUPPORTED_DIALECTS,
-	type TestContext,
-} from './test-setup.mjs'
+import { initTest, SUPPORTED_DIALECTS, type TestContext } from './test-setup.js'
 
 for (const dialect of SUPPORTED_DIALECTS) {
 	describe.skipIf(dialect === 'bun' && !isBun)(dialect, () => {

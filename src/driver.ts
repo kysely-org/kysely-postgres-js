@@ -52,6 +52,17 @@ export class PostgresJSDriver extends PostgresDriver {
 	}
 
 	override async destroy(_options?: AbortableOperationOptions): Promise<void> {
+		if (!this.#postgres) {
+			return
+		}
+
+		// cleared before `end()` so a repeated `destroy()` is a no-op instead of
+		// ending the pools twice.
+		const controlPostgres = this.#controlPostgres
+		const postgres = this.#postgres
+		this.#controlPostgres = undefined
+		this.#postgres = undefined
+
 		// Bun SQL's pool cannot gracefully `end()` once a reserved connection's
 		// session was killed via `pg_terminate_backend` - even when the killed
 		// query settled cleanly beforehand - so we have to force-close.
@@ -61,8 +72,8 @@ export class PostgresJSDriver extends PostgresDriver {
 			this.#isBun && this.#sessionsKilled ? { timeout: 0 } : undefined
 
 		await Promise.all([
-			this.#postgres?.end(endOptions),
-			this.#controlPostgres?.end(endOptions),
+			postgres?.end(endOptions),
+			controlPostgres?.end(endOptions),
 		])
 	}
 

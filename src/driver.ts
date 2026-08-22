@@ -72,7 +72,7 @@ export class PostgresJSDriver extends PostgresDriver {
 			this.#isBun && this.#sessionsKilled ? { timeout: 0 } : undefined
 
 		await Promise.all([
-			postgres?.end(endOptions),
+			postgres.end(endOptions),
 			controlPostgres?.end(endOptions),
 		])
 	}

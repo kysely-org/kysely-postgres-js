@@ -51,7 +51,7 @@ export interface PostgresJSSql {
 
 export interface PostgresJSSqlOptions {
 	/**
-	 * Bun SQL only.
+	 * Bun.SQL only.
 	 */
 	adapter?: 'postgres' | 'mysql' | 'sqlite' | 'mariadb'
 	max?: number
@@ -75,17 +75,6 @@ export interface PostgresJSReservedSql {
 export interface PostgresJSPendingQuery
 	// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.
 	extends Promise<any[] & Iterable<any> & PostgresJSResultQueryMeta> {
-	/**
-	 * Cancels this pending query on the database side, if supported. Present on
-	 * both `postgres`'s pending queries and Bun's `SQL`, though Bun `SQL`'s
-	 * pending query `.cancel()` is a client-side placeholder - it only flips
-	 * the query's `cancelled` flag, without cancelling the in-flight query
-	 * server-side (the query even resolves normally). Because of that,
-	 * `PostgresJSConnection.cancelQuery` only calls this when running on
-	 * `postgres`, and cancels on the database side itself when running on Bun,
-	 * by executing `pg_cancel_backend` on a control connection - similarly to
-	 * Kysely's core dialects.
-	 */
 	cancel: () => void
 
 	// biome-ignore lint/suspicious/noExplicitAny: we wanna match widely, to be safe.
@@ -94,9 +83,7 @@ export interface PostgresJSPendingQuery
 	// | ((cb: (row: [any]) => void) => Promise<ExecutionResult>)
 
 	/**
-	 * This is the state of the connection that executed the query.
-	 *
-	 * Exists only in `postgres`.
+	 * `postgres` only.
 	 */
 	state?: {
 		pid: number

@@ -38,7 +38,10 @@ export class PostgresJSDriver extends PostgresDriver {
 			throw new PostgresJSDialectError('missing underlying driver instance')
 		}
 
-		const reservedConnection = await this.#postgres.reserve()
+		// Bun 1.4 introduced abort signal support in `reserve()`.
+		const reservedConnection = await (this.#isBun
+			? this.#postgres.reserve({ signal: options?.signal })
+			: this.#postgres.reserve())
 
 		const connection = new PostgresJSConnection(
 			reservedConnection,

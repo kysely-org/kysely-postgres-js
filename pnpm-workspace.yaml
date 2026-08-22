@@ -4,7 +4,7 @@ packages:
 # Allow (true) or disallow (false) script execution.
 # https://pnpm.io/settings#allowbuilds
 allowBuilds:
-  esbuild@0.25.9: true # vitest dependency.
+  esbuild@0.27.7: true # vitest dependency.
 
 # Deduplicate peer dependencies.
 # see: https://github.com/pnpm/pnpm/issues/11070
@@ -22,6 +22,24 @@ ignoreWorkspaceRootCheck: true
 # versions match `minimumReleaseAge` range (default is 1 day).
 # https://pnpm.io/settings#minimumreleaseagestrict
 minimumReleaseAgeStrict: true
+
+overrides:
+  # https://github.com/advisories/GHSA-6g55-p6wh-862q
+  # https://github.com/advisories/GHSA-r28c-9q8g-f849
+  # https://github.com/advisories/GHSA-qx2v-qp2m-jg93
+  # https://github.com/advisories/GHSA-fxqj-rqcc-2cmp
+  postcss@>=8.0.0 <8.5.23: 8.5.23
+  # https://github.com/advisories/GHSA-mw96-cpmx-2vgc
+  rollup@>=4.0.0 <4.59.0: 4.59.0
+  # https://github.com/advisories/GHSA-v2wj-q39q-566r
+  # https://github.com/advisories/GHSA-p9ff-h696-f583
+  # https://github.com/advisories/GHSA-fx2h-pf6j-xcff
+  # https://github.com/advisories/GHSA-93m4-6634-74q7
+  # https://github.com/advisories/GHSA-4w7w-66w2-5vf9
+  # https://github.com/advisories/GHSA-v6wh-96g9-6wx3
+  # https://github.com/advisories/GHSA-g4jq-h2w9-997c
+  # https://github.com/advisories/GHSA-jqfw-vq24-v9c3
+  vite@>=7.0.0 <7.3.5: 7.3.5
 
 # how versions get prefixed in `package.json`.
 # https://pnpm.io/settings#saveprefix

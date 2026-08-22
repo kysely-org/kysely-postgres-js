@@ -46,7 +46,10 @@ export interface PostgresJSSql {
 
 	options: PostgresJSSqlOptions
 
-	reserve(): Promise<PostgresJSReservedSql>
+	reserve(
+		// only in Bun >= 1.4
+		options?: { signal?: AbortSignal },
+	): Promise<PostgresJSReservedSql>
 }
 
 export interface PostgresJSSqlOptions {

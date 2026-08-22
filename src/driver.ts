@@ -296,7 +296,7 @@ class PostgresJSConnection implements DatabaseConnection {
 		action: 'cancel' | 'terminate',
 		controlConnectionProvider: ControlConnectionProvider,
 	): Promise<void> {
-		if (!this.#pid) {
+		if (this.#pid == null) {
 			throw new PostgresJSDialectError('pid missing for backend query')
 		}
 
@@ -312,12 +312,14 @@ class PostgresJSConnection implements DatabaseConnection {
 
 		if (!this.#controlPostgres) {
 			return await controlConnectionProvider(async (connection) => {
-				if (this.#pendingQuery === pendingQuery) {
-					await connection.executeQuery(CompiledQuery.raw(query))
+				if (this.#pendingQuery !== pendingQuery) {
+					return
+				}
 
-					if (action === 'terminate') {
-						this.#sessionKilled = true
-					}
+				await connection.executeQuery(CompiledQuery.raw(query))
+
+				if (action === 'terminate') {
+					this.#sessionKilled = true
 				}
 			})
 		}
@@ -325,12 +327,14 @@ class PostgresJSConnection implements DatabaseConnection {
 		const controlConnection = await this.#controlPostgres.reserve()
 
 		try {
-			if (this.#pendingQuery === pendingQuery) {
-				await controlConnection.unsafe(query)
+			if (this.#pendingQuery !== pendingQuery) {
+				return
+			}
 
-				if (action === 'terminate') {
-					this.#sessionKilled = true
-				}
+			await controlConnection.unsafe(query)
+
+			if (action === 'terminate') {
+				this.#sessionKilled = true
 			}
 		} finally {
 			controlConnection.release()

@@ -2,9 +2,14 @@ import { type Generated, Kysely } from 'kysely'
 import postgres from 'postgres'
 import { isBun } from 'std-env'
 
-import { PostgresJSDialect, type PostgresJSDialectConfig } from '..'
+import {
+	PostgresJSDialect,
+	type PostgresJSDialectConfig,
+	type PostgresJSSql,
+} from '..'
 
-const CONNECTION_STRING = 'postgres://postgres:postgres@localhost:5432/main'
+export const CONNECTION_STRING =
+	'postgres://postgres:postgres@localhost:5432/main'
 
 export const SUPPORTED_DIALECTS = ['v3', 'bun'] as const
 
@@ -18,7 +23,10 @@ const getDialect = (
 				? new PostgresJSDialect({
 						...config,
 						postgres: () =>
-							import('bun').then((mod) => new mod.SQL(CONNECTION_STRING)),
+							import('bun').then(
+								(mod) =>
+									new mod.SQL(CONNECTION_STRING) as unknown as PostgresJSSql,
+							),
 					})
 				: undefined,
 			v3: new PostgresJSDialect({

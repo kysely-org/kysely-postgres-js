@@ -1,5 +1,6 @@
 import { setTimeout } from 'node:timers/promises'
-import { sql } from 'kysely'
+import { Kysely, sql } from 'kysely'
+import postgres from 'postgres'
 import { isBun } from 'std-env'
 import {
 	afterAll,
@@ -10,7 +11,10 @@ import {
 	it,
 	vi,
 } from 'vitest'
+import { PostgresJSDialect, type PostgresJSSql } from '..'
 import {
+	CONNECTION_STRING,
+	type Database,
 	initTest,
 	resetState,
 	SUPPORTED_DIALECTS,
@@ -292,15 +296,116 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			expect(Date.now() - start).toBeLessThan(400)
 		})
 
-		it.skipIf(dialect === 'bun')(
-			"should cancel the query on the database side when inflightQueryAbortStrategy is 'cancel query'",
-			async () => {
+		it("should cancel the query on the database side when inflightQueryAbortStrategy is 'cancel query'", async () => {
+			await expect(
+				sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
+					ctx.db,
+					{
+						signal: timeoutSignal(50),
+						inflightQueryAbortStrategy: 'cancel query',
+					},
+				),
+			).rejects.toSatisfy((error) => {
+				expect(error).toBeInstanceOf(DOMException)
+				expect(error).toMatchObject({
+					name: 'TimeoutError',
+					__kysely_timing__: 'during query execution',
+				})
+				return true
+			})
+
+			// give the sleep plenty of time to finish, in case the update
+			// wasn't actually cancelled on the database side.
+			await setTimeout(700)
+
+			const person = await ctx.db
+				.selectFrom('person')
+				.select('name')
+				.where('id', '=', '48856ed4-9f1f-4111-ba7f-6092a1be96eb')
+				.executeTakeFirstOrThrow()
+
+			expect(person.name).toBe('moshe')
+		})
+
+		it("should kill the session on the database side when inflightQueryAbortStrategy is 'kill session'", async () => {
+			// the killed query rejects in the background with a connection
+			// error, which kysely reports via console.error.
+			vi.spyOn(console, 'error').mockImplementation(() => {})
+
+			await expect(
+				sql`update person set name = 'killed' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
+					ctx.db,
+					{
+						signal: timeoutSignal(50),
+						inflightQueryAbortStrategy: 'kill session',
+					},
+				),
+			).rejects.toSatisfy((error) => {
+				expect(error).toBeInstanceOf(DOMException)
+				expect(error).toMatchObject({
+					name: 'TimeoutError',
+					__kysely_timing__: 'during query execution',
+				})
+				return true
+			})
+
+			// give the sleep plenty of time to finish, in case the session
+			// wasn't actually terminated on the database side.
+			await setTimeout(700)
+
+			const person = await ctx.db
+				.selectFrom('person')
+				.select('name')
+				.where('id', '=', '48856ed4-9f1f-4111-ba7f-6092a1be96eb')
+				.executeTakeFirstOrThrow()
+
+			expect(person.name).toBe('moshe')
+
+			// the pool should replace the terminated connection transparently.
+			const people = await ctx.db.selectFrom('person').selectAll().execute()
+
+			expect(people).toHaveLength(4)
+		})
+
+		it("should kill the session through `controlPostgres` when it is configured and inflightQueryAbortStrategy is 'kill session'", async () => {
+			// the killed query rejects in the background with a connection
+			// error, which kysely reports via console.error.
+			vi.spyOn(console, 'error').mockImplementation(() => {})
+
+			const controlQueries: string[] = []
+
+			const { db } = await initTest(dialect, {
+				controlPostgres: (options) => {
+					const instance: PostgresJSSql =
+						dialect === 'bun'
+							? new Bun.SQL(options)
+							: (postgres(options as never) as unknown as PostgresJSSql)
+
+					return {
+						end: () => instance.end(),
+						options: instance.options,
+						reserve: async () => {
+							const reservedConnection = await instance.reserve()
+
+							return {
+								release: () => reservedConnection.release(),
+								unsafe: (query, ...args) => {
+									controlQueries.push(query)
+									return reservedConnection.unsafe(query, ...args)
+								},
+							}
+						},
+					}
+				},
+			})
+
+			try {
 				await expect(
-					sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
-						ctx.db,
+					sql`update person set name = 'killed' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
+						db,
 						{
 							signal: timeoutSignal(50),
-							inflightQueryAbortStrategy: 'cancel query',
+							inflightQueryAbortStrategy: 'kill session',
 						},
 					),
 				).rejects.toSatisfy((error) => {
@@ -312,70 +417,75 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					return true
 				})
 
-				// give the sleep plenty of time to finish, in case the update
-				// wasn't actually cancelled on the database side.
-				await setTimeout(700)
+				await setTimeout(100)
 
-				const person = await ctx.db
+				expect(controlQueries).toContainEqual(
+					expect.stringContaining('pg_terminate_backend'),
+				)
+
+				await setTimeout(600)
+
+				const person = await db
 					.selectFrom('person')
 					.select('name')
 					.where('id', '=', '48856ed4-9f1f-4111-ba7f-6092a1be96eb')
 					.executeTakeFirstOrThrow()
 
 				expect(person.name).toBe('moshe')
-			},
-		)
+			} finally {
+				await db.destroy()
+			}
+		})
 
-		it.skipIf(dialect !== 'bun')(
-			"should throw, in the background, instead of silently no-op-ing when inflightQueryAbortStrategy is 'cancel query'",
-			async () => {
-				const consoleErrorSpy = vi
-					.spyOn(console, 'error')
-					.mockImplementation(() => {})
+		it("should not leak the main pool's only slot when killing sessions", async () => {
+			// the killed query rejects in the background with a connection
+			// error, which kysely reports via console.error.
+			vi.spyOn(console, 'error').mockImplementation(() => {})
 
+			const db = new Kysely<Database>({
+				dialect: new PostgresJSDialect({
+					controlPostgres: dialect === 'bun' ? Bun.SQL : postgres,
+					postgres: () =>
+						dialect === 'bun'
+							? import('bun').then(
+									(mod) =>
+										new mod.SQL(CONNECTION_STRING, {
+											max: 1,
+										}) as unknown as PostgresJSSql,
+								)
+							: (postgres(CONNECTION_STRING, {
+									max: 1,
+									onnotice() {},
+								}) as unknown as PostgresJSSql),
+				}),
+			})
+
+			try {
 				await expect(
-					sql`update person set name = 'cancelled' from (select pg_sleep(0.5)) as delay where name = 'moshe'`.execute(
-						ctx.db,
-						{
-							signal: timeoutSignal(50),
-							inflightQueryAbortStrategy: 'cancel query',
-						},
-					),
+					sql`select pg_sleep(0.5)`.execute(db, {
+						signal: timeoutSignal(50),
+						inflightQueryAbortStrategy: 'kill session',
+					}),
 				).rejects.toSatisfy((error) => {
 					expect(error).toBeInstanceOf(DOMException)
 					expect(error).toMatchObject({
 						name: 'TimeoutError',
-						message: 'The operation timed out.',
+						__kysely_timing__: 'during query execution',
 					})
 					return true
 				})
 
-				// the background inflight-query-abort-handler failure is only
-				// reported asynchronously, after the execute() call above
-				// already rejected due to the abort signal.
-				await setTimeout(100)
+				await setTimeout(300)
 
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
-					expect.stringContaining(
-						'Cancelling in-flight queries is not supported when running on Bun',
-					),
-				)
+				// the pool's only slot held the killed session. subsequent
+				// queries must get a fresh connection in its place.
+				const people = await db.selectFrom('person').selectAll().execute()
 
-				consoleErrorSpy.mockRestore()
-
-				// give the sleep plenty of time to finish, since Bun can't
-				// actually cancel it on the database side.
-				await setTimeout(700)
-
-				const person = await ctx.db
-					.selectFrom('person')
-					.select('name')
-					.where('id', '=', '48856ed4-9f1f-4111-ba7f-6092a1be96eb')
-					.executeTakeFirstOrThrow()
-
-				expect(person.name).toBe('cancelled')
-			},
-		)
+				expect(people).toHaveLength(4)
+			} finally {
+				await db.destroy()
+			}
+		})
 
 		it.skipIf(dialect === 'bun')(
 			'should stream normally when passed a non-aborted signal',

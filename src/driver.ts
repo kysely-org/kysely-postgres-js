@@ -197,9 +197,11 @@ class PostgresJSConnection implements DatabaseConnection {
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
-		this.#pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
-			...compiledQuery.parameters,
-		])
+		this.#pendingQuery = this.#reservedConnection.unsafe(
+			compiledQuery.sql,
+			[...compiledQuery.parameters],
+			{ prepare: true, simple: false },
+		)
 
 		try {
 			const result = await this.#pendingQuery

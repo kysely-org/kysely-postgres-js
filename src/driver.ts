@@ -201,7 +201,6 @@ class PostgresJSConnection implements DatabaseConnection {
 		this.#pendingQuery = this.#reservedConnection.unsafe(
 			compiledQuery.sql,
 			[...compiledQuery.parameters],
-			// Keep parameterless raw batches on the simple protocol.
 			QueryNode.is(compiledQuery.query) || compiledQuery.parameters.length > 0
 				? { prepare: true, simple: false }
 				: undefined,

@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/core": "0.18.5",
-    "@biomejs/biome": "2.5.9",
+    "@biomejs/biome": "2.5.14",
     "@tsconfig/node24": "24.0.5",
     "@types/bun": "1.4.0",
     "@types/node": "26.2.0",

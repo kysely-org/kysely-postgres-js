@@ -4,6 +4,7 @@ import {
 	type ControlConnectionProvider,
 	type DatabaseConnection,
 	PostgresDriver,
+	QueryNode,
 	type QueryResult,
 } from 'kysely'
 import type {
@@ -200,7 +201,10 @@ class PostgresJSConnection implements DatabaseConnection {
 		this.#pendingQuery = this.#reservedConnection.unsafe(
 			compiledQuery.sql,
 			[...compiledQuery.parameters],
-			{ prepare: true, simple: false },
+			// Keep parameterless raw batches on the simple protocol.
+			QueryNode.is(compiledQuery.query) || compiledQuery.parameters.length > 0
+				? { prepare: true, simple: false }
+				: undefined,
 		)
 
 		try {

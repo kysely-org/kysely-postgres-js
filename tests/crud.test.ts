@@ -38,6 +38,22 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			await ctx.db.destroy()
 		})
 
+		it('should execute parameterless raw batches inside a transaction', async () => {
+			await ctx.db.transaction().execute(async (trx) => {
+				await sql`
+					SET LOCAL transaction_timeout = '15s';
+					SET LOCAL ROLE postgres;
+				`.execute(trx)
+
+				const { rows } = await sql<{ timeout: string; role: string }>`
+					select current_setting('transaction_timeout') as timeout,
+					       current_setting('role') as role
+				`.execute(trx)
+
+				expect(rows).toEqual([{ timeout: '15s', role: 'postgres' }])
+			})
+		})
+
 		it('should execute select queries', async () => {
 			const result = await ctx.db.selectFrom('person').selectAll().execute()
 

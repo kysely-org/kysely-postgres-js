@@ -6,14 +6,20 @@ packages:
 allowBuilds:
   esbuild@0.27.7: true # vitest dependency.
 
+# Configure dependency security auditing.
+# https://pnpm.io/cli/audit#configuration
 audit:
   ignore:
     # `esbuild@>=0.27.3 <0.28.1` allows arbitrary file read when running the development server on Windows. `vitest@5.0.1` still on `esbuild@0.27.x`.
     # https://github.com/advisories/GHSA-g7r4-m6w7-qqqr
     - GHSA-g7r4-m6w7-qqqr
 
-# Deduplicate peer dependencies.
-# see: https://github.com/pnpm/pnpm/issues/11070
+# Deduplicate compatible dependency versions during installation.
+# https://pnpm.io/settings/dependency-resolution#autodedupe
+autoDedupe: true
+
+# Simplify peer dependency identifiers to reduce duplicate package instances.
+# https://pnpm.io/settings/peer-dependencies#dedupepeers
 dedupePeers: true
 
 # Deny package installs that don't match the supported Node.js version/s.

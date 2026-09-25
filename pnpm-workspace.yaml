@@ -14,10 +14,6 @@ audit:
     # https://github.com/advisories/GHSA-g7r4-m6w7-qqqr
     - GHSA-g7r4-m6w7-qqqr
 
-# Deduplicate compatible dependency versions during installation.
-# https://pnpm.io/settings/dependency-resolution#autodedupe
-autoDedupe: true
-
 # Simplify peer dependency identifiers to reduce duplicate package instances.
 # https://pnpm.io/settings/peer-dependencies#dedupepeers
 dedupePeers: true

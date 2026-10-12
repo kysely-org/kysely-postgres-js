@@ -185,3 +185,12 @@ const db = new Kysely<Database>({
   }),
 })
 ```
+
+## Prepared statements
+
+`postgres` prepares statements by default when using it's template literal form,
+and supports connection max lifetime settings that effectively evict memory.
+
+This dialect makes use of prepared statements starting from version 5, to match upstream.
+
+When running in a long running server, be mindful of https://github.com/kysely-org/kysely-postgres-js/issues/468.

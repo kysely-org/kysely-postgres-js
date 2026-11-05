@@ -70,8 +70,7 @@ export class PostgresJSDriver extends PostgresDriver {
 		// Bun SQL's pool cannot gracefully `end()` once a reserved connection's
 		// session was killed via `pg_terminate_backend` - even when the killed
 		// query settled cleanly beforehand - so we have to force-close.
-		// `postgres` is unaffected: `killSession` cancels the in-flight query
-		// first, so its pool stays cleanly endable.
+		// `postgres` is unaffected: its pool stays cleanly endable.
 		const endOptions =
 			this.#isBun && this.#sessionsKilled ? { timeout: 0 } : undefined
 
@@ -229,52 +228,12 @@ class PostgresJSConnection implements DatabaseConnection {
 	async killSession(
 		controlConnectionProvider: ControlConnectionProvider,
 	): Promise<void> {
-		if (this.#isBun) {
-			if (!this.#pendingQuery) {
-				return
-			}
-
-			return await this.#affectBackend('terminate', controlConnectionProvider)
-		}
-
-		// captured once - the field is cleared by `executeQuery`'s `finally` the
-		// moment the query settles, while we keep needing the promise below.
-		const pendingQuery = this.#pendingQuery
-
-		if (!pendingQuery) {
+		if (!this.#pendingQuery) {
 			return
 		}
 
-		this.#pid ??= pendingQuery.state?.pid
-
-		// terminating a busy `postgres` connection poisons its pool slot - the
-		// in-flight query's state is never cleared on socket close, so the slot
-		// can never reconnect and graceful `end()` hangs forever. cancelling
-		// first lets the connection settle cleanly, and only then we terminate
-		// the idle session.
-		pendingQuery.cancel()
-
-		// `cancel()` only *requests* cancellation - it fires a CancelRequest
-		// over a separate throwaway socket, while the reserved connection's
-		// internal in-flight query state is only cleared once the server's
-		// response ("57014: canceling statement due to user request", which is
-		// not ours to throw) arrives back on the data socket. the promise
-		// settling is the one observable signal that this round trip completed
-		// and the connection is idle and clean. terminating without waiting
-		// races the two sockets - if `pg_terminate_backend` wins, the backend
-		// dies mid-statement, and we've poisoned the slot after all.
-		const wasCancelled = await pendingQuery.then(
-			() => false,
-			(error) => (error as { code?: unknown } | null)?.code === '57014',
-		)
-
-		// the query settled without our cancellation interrupting it - it either
-		// beat the cancel and completed successfully, or failed on its own.
-		// Kysely's core dialects don't kill the session once the query settled -
-		// neither do we.
-		if (!wasCancelled) {
-			return
-		}
+		// postgres.js hands us the pid on pending queries.
+		this.#pid ??= this.#pendingQuery.state?.pid
 
 		return await this.#affectBackend('terminate', controlConnectionProvider)
 	}
@@ -361,13 +320,6 @@ class PostgresJSConnection implements DatabaseConnection {
 	}
 
 	[RELEASE_CONNECTION_SYMBOL](): void {
-		// after `pg_terminate_backend`, `postgres`'s pool has already moved the
-		// dead connection to its closed queue. releasing it would move it back
-		// to the open queue, and queries dispatched to it would then hang.
-		if (this.#sessionKilled && !this.#isBun) {
-			return
-		}
-
 		this.#reservedConnection.release()
 	}
 }

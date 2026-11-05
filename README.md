@@ -13,7 +13,7 @@
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=flat&logo=discord&logoColor=white)](https://discord.gg/xyBJ3GwvAm)
 [![Bluesky](https://img.shields.io/badge/Bluesky-0285FF?style=flat&logo=Bluesky&logoColor=white)](https://bsky.app/profile/kysely.dev)
 
-`kysely-postgres-js` offers a [Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) that supports the [Postgres.js](https://github.com/porsager/postgres) client library (version >= 3.4) and [Bun](https://bun.com/)'s (version >= 1.2) [SQL](https://bun.com/docs/api/sql) native binding.
+`kysely-postgres-js` offers a [Kysely](https://github.com/koskimas/kysely) dialect for [PostgreSQL](https://www.postgresql.org/) that supports the [Postgres.js](https://github.com/porsager/postgres) client library (version >= 4) and [Bun](https://bun.com/)'s (version >= 1.2) [SQL](https://bun.com/docs/api/sql) native binding.
 
 This dialect should not be confused with [Kysely](https://github.com/koskimas/kysely)'s core [PostgreSQL](https://www.postgresql.org/) dialect, which supports the significantly more adopted [pg](https://github.com/brianc/node-postgres) client library and [Neon](https://neon.com)'s WebSockets [Pool](https://neon.com/docs/serverless/serverless-driver#use-the-driver-over-websockets) instead. Both of these dialects are maintained by members of the [Kysely](https://github.com/koskimas/kysely) core team and are production ready.
 
@@ -192,5 +192,3 @@ const db = new Kysely<Database>({
 and supports connection max lifetime settings that effectively evict memory.
 
 This dialect makes use of prepared statements starting from version 5, to match upstream.
-
-When running in a long running server, be mindful of https://github.com/kysely-org/kysely-postgres-js/issues/468.

@@ -11,7 +11,7 @@ import {
 export const CONNECTION_STRING =
 	'postgres://postgres:postgres@localhost:5432/main'
 
-export const SUPPORTED_DIALECTS = ['v3', 'bun'] as const
+export const SUPPORTED_DIALECTS = ['v4', 'bun'] as const
 
 const getDialect = (
 	dialect: (typeof SUPPORTED_DIALECTS)[number],
@@ -29,7 +29,7 @@ const getDialect = (
 							),
 					})
 				: undefined,
-			v3: new PostgresJSDialect({
+			v4: new PostgresJSDialect({
 				...config,
 				postgres: () =>
 					postgres(CONNECTION_STRING, {

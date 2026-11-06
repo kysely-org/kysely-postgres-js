@@ -211,6 +211,14 @@ class PostgresJSConnection implements DatabaseConnection {
 
 			const { command, count } = result
 
+			// PostgreSQL completes COMMIT with a ROLLBACK tag if an earlier
+			// statement error left the transaction aborted. `PostgresDriver`'s
+			// `commitTransaction` reads the tag to reject with
+			// `AbortedTransactionError`, so we surface it the way core does.
+			if (command === 'COMMIT' || command === 'ROLLBACK') {
+				return { rows: [{ command } as R] }
+			}
+
 			return {
 				numAffectedRows:
 					command === 'INSERT' ||

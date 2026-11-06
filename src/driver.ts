@@ -106,14 +106,14 @@ export class PostgresJSDriver extends PostgresDriver {
 	}
 
 	override async rollbackTransaction(
-		connection: PostgresJSConnection,
+		connection: DatabaseConnection,
 	): Promise<void> {
 		try {
 			await connection.executeQuery(CompiledQuery.raw('rollback'))
 		} catch (error) {
 			// a failed rollback can leave the session inside an open transaction.
 			// the connection must not go back into rotation.
-			await connection[DISCARD_CONNECTION_SYMBOL]()
+			await (connection as PostgresJSConnection)[DISCARD_CONNECTION_SYMBOL]()
 			throw error
 		}
 	}

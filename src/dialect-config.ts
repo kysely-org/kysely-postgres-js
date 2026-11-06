@@ -65,6 +65,10 @@ export interface BunSqlClass {
 }
 
 export interface PostgresJSReservedSql {
+	/**
+	 * Bun SQL only. Closes the connection instead of returning it to the pool.
+	 */
+	close?(options?: { timeout?: number }): Promise<void>
 	release(): void
 	unsafe(
 		query: string,

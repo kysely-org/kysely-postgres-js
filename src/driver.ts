@@ -17,6 +17,7 @@ import type {
 } from './dialect-config.js'
 import { freeze } from './utils.js'
 
+const DISCARD_CONNECTION_SYMBOL = Symbol('discard')
 const RELEASE_CONNECTION_SYMBOL = Symbol('release')
 const SESSION_KILLED_SYMBOL = Symbol('sessionKilled')
 
@@ -104,6 +105,19 @@ export class PostgresJSDriver extends PostgresDriver {
 				)
 	}
 
+	override async rollbackTransaction(
+		connection: DatabaseConnection,
+	): Promise<void> {
+		try {
+			await connection.executeQuery(CompiledQuery.raw('rollback'))
+		} catch (error) {
+			// a failed rollback can leave the session inside an open transaction.
+			// the connection must not go back into rotation.
+			await (connection as PostgresJSConnection)[DISCARD_CONNECTION_SYMBOL]()
+			throw error
+		}
+	}
+
 	override async releaseConnection(
 		connection: DatabaseConnection,
 		_options?: AbortableOperationOptions,
@@ -149,6 +163,8 @@ class PostgresJSConnection implements DatabaseConnection {
 	readonly #controlPostgres: PostgresJSSql | undefined
 	readonly #isBun: boolean | undefined
 	readonly #reservedConnection: PostgresJSReservedSql
+	#closed = false
+	#discarded = false
 	#pendingQuery: PostgresJSPendingQuery | undefined
 	#pid: number | undefined
 	#sessionKilled = false
@@ -188,6 +204,8 @@ class PostgresJSConnection implements DatabaseConnection {
 			return
 		}
 
+		this.#assertNotDiscarded()
+
 		const [{ pid }] = await this.#reservedConnection.unsafe(
 			'select pg_backend_pid() as pid',
 		)
@@ -198,6 +216,8 @@ class PostgresJSConnection implements DatabaseConnection {
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
+		this.#assertNotDiscarded()
+
 		this.#pendingQuery = this.#reservedConnection.unsafe(
 			compiledQuery.sql,
 			[...compiledQuery.parameters],
@@ -303,6 +323,8 @@ class PostgresJSConnection implements DatabaseConnection {
 			throw new PostgresJSDialectError('chunkSize must be a positive integer')
 		}
 
+		this.#assertNotDiscarded()
+
 		this.#pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
 			...compiledQuery.parameters,
 		])
@@ -368,11 +390,46 @@ class PostgresJSConnection implements DatabaseConnection {
 		}
 	}
 
+	async [DISCARD_CONNECTION_SYMBOL](): Promise<void> {
+		this.#discarded = true
+
+		// `postgres` closes a reserved connection that is released with a
+		// transaction still open. Bun SQL recycles it, transaction and all, so
+		// we close it instead of releasing it. if closing fails, we release as
+		// usual rather than leak the pool slot.
+		//
+		// Bun < 1.4 can't `end()` a pool after one of its reserved connections
+		// was closed, so we leave the connection to the pool there.
+		if (
+			!this.#isBun ||
+			!this.#reservedConnection.close ||
+			!Bun.semver.satisfies(Bun.version, '>=1.4')
+		) {
+			return
+		}
+
+		this.#closed = await this.#reservedConnection.close().then(
+			() => true,
+			() => false,
+		)
+	}
+
+	#assertNotDiscarded(): void {
+		if (this.#discarded) {
+			throw new PostgresJSDialectError('connection has been discarded')
+		}
+	}
+
 	[RELEASE_CONNECTION_SYMBOL](): void {
 		// after `pg_terminate_backend`, `postgres`'s pool has already moved the
 		// dead connection to its closed queue. releasing it would move it back
 		// to the open queue, and queries dispatched to it would then hang.
 		if (this.#sessionKilled && !this.#isBun) {
+			return
+		}
+
+		// closed by `DISCARD_CONNECTION_SYMBOL`.
+		if (this.#closed) {
 			return
 		}
 

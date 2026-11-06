@@ -104,6 +104,15 @@ export class PostgresJSDriver extends PostgresDriver {
 				)
 	}
 
+	// core's implementation marks its own connection class for discard on
+	// failure, through a method our connection doesn't have. the client
+	// handles a released connection that is still inside a transaction.
+	override async rollbackTransaction(
+		connection: DatabaseConnection,
+	): Promise<void> {
+		await connection.executeQuery(CompiledQuery.raw('rollback'))
+	}
+
 	override async releaseConnection(
 		connection: DatabaseConnection,
 		_options?: AbortableOperationOptions,

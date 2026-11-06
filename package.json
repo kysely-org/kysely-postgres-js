@@ -47,7 +47,7 @@
   },
   "peerDependencies": {
     "kysely": ">= 0.29.0 < 1",
-    "postgres": "^3.4.0"
+    "postgres": ">= 3.4.0 < 5"
   },
   "peerDependenciesMeta": {
     "postgres": {

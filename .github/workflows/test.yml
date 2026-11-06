@@ -12,9 +12,9 @@ jobs:
   node:
     concurrency:
       cancel-in-progress: ${{ github.ref_name != 'main' }}
-      group: ${{ github.workflow }}-node-${{ matrix.node-version }}-${{ github.event.pull_request.number || github.sha }}
+      group: ${{ github.workflow }}-node-${{ matrix.node-version }}-postgres-${{ matrix.postgres-version }}-${{ github.event.pull_request.number || github.sha }}
 
-    name: Node.js ${{ matrix.node-version }}
+    name: Node.js ${{ matrix.node-version }} / postgres ${{ matrix.postgres-version }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -22,6 +22,7 @@ jobs:
       matrix:
         # https://endoflife.date/nodejs
         node-version: [22.x, 24.x, 26.x]
+        postgres-version: [3, 4]
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -49,6 +50,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Use postgres ${{ matrix.postgres-version }}
+        run: pnpm add -D postgres@${{ matrix.postgres-version }}
+
       - name: Build
         run: pnpm build
 
@@ -58,15 +62,16 @@ jobs:
   bun:
     concurrency:
       cancel-in-progress: ${{ github.ref_name != 'main' }}
-      group: ${{ github.workflow }}-bun-${{ matrix.bun-version }}-${{ github.event.pull_request.number || github.sha }}
+      group: ${{ github.workflow }}-bun-${{ matrix.bun-version }}-postgres-${{ matrix.postgres-version }}-${{ github.event.pull_request.number || github.sha }}
 
-    name: Bun ${{ matrix.bun-version }}
+    name: Bun ${{ matrix.bun-version }} / postgres ${{ matrix.postgres-version }}
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         bun-version: [1.2, 1.3, 1.4]
+        postgres-version: [3, 4]
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
@@ -98,6 +103,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Use postgres ${{ matrix.postgres-version }}
+        run: pnpm add -D postgres@${{ matrix.postgres-version }}
 
       - name: Build
         run: pnpm build

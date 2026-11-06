@@ -186,8 +186,8 @@ importers:
         specifier: 0.14.3
         version: 0.14.3
       kysely:
-        specifier: 0.29.6
-        version: 0.29.6
+        specifier: 0.29.8
+        version: 0.29.8
       postgres:
         specifier: 3.4.9
         version: 3.4.9
@@ -1056,8 +1056,8 @@ packages:
     resolution: {integrity: sha512-PGxnDepx7vwJoZQe2SHbyBiFfpGwsOKmX4kn/wZZqfMafV7fjXqTxSaX6lp9QHYkSTLKkER+P/wmrZY3gVJNzg==}
     hasBin: true
 
-  kysely@0.29.6:
-    resolution: {integrity: sha512-hHaB8C/rfzDDtr/t8YZwxAuPJTT0zHyaPoVzcXwDYhYNAgH/4sIfVhi/XLLIY+bL/FqaIJnjATDbi8ObSELmxg==}
+  kysely@0.29.8:
+    resolution: {integrity: sha512-ixHU1H4R+LeC5Y0nAhYgiGRFpFRHm2DXKEmJSs/vbes9sKXyssyzxzE/NYiOJX5fY0BL28biCre3GqlCqUwyXQ==}
     engines: {node: '>=22.0.0'}
 
   lru-cache@11.5.2:
@@ -1861,7 +1861,7 @@ snapshots:
       node-stream-zip: 1.16.0
       semiver: 1.1.0
 
-  kysely@0.29.6: {}
+  kysely@0.29.8: {}
 
   lru-cache@11.5.2: {}
 

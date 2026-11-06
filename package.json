@@ -61,7 +61,7 @@
     "@types/bun": "1.4.2",
     "@types/node": "26.6.2",
     "jsr": "0.14.3",
-    "kysely": "0.29.6",
+    "kysely": "0.29.8",
     "postgres": "3.4.9",
     "publint": "0.3.24",
     "std-env": "4.2.0",

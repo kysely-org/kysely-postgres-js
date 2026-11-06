@@ -1,5 +1,5 @@
 import { setTimeout } from 'node:timers/promises'
-import { Kysely, sql } from 'kysely'
+import { AbortedTransactionError, Kysely, sql, type Transaction } from 'kysely'
 import postgres from 'postgres'
 import { isBun } from 'std-env'
 import {
@@ -532,6 +532,98 @@ for (const dialect of SUPPORTED_DIALECTS) {
 				.stream({ signal: controller.signal })
 
 			await expect(iterator.next()).rejects.toBe(reason)
+		})
+
+		it('should reject a commit when a caught statement error aborted the transaction', async () => {
+			let escapedTrx: Transaction<Database> | undefined
+
+			await expect(
+				ctx.db.transaction().execute(async (trx) => {
+					escapedTrx = trx
+
+					await trx.insertInto('person').values({ name: 'shlomo' }).execute()
+
+					await expect(
+						trx.insertInto('person').values({ name: 'moshe' }).execute(),
+					).rejects.toThrow('duplicate key')
+
+					return 'success'
+				}),
+			).rejects.toBeInstanceOf(AbortedTransactionError)
+
+			await expect(
+				// biome-ignore lint/style/noNonNullAssertion: assigned in the callback above.
+				escapedTrx!.selectFrom('person').selectAll().execute(),
+			).rejects.toThrow('Transaction is already rolled back')
+
+			expect(
+				await ctx.db
+					.selectFrom('person')
+					.selectAll()
+					.where('name', '=', 'shlomo')
+					.execute(),
+			).toEqual([])
+		})
+
+		it('should reject a controlled commit when a caught statement error aborted the transaction', async () => {
+			const trx = await ctx.db.startTransaction().execute()
+
+			try {
+				await trx.insertInto('person').values({ name: 'shlomo' }).execute()
+
+				await expect(
+					trx.insertInto('person').values({ name: 'moshe' }).execute(),
+				).rejects.toThrow('duplicate key')
+
+				await expect(trx.commit().execute()).rejects.toBeInstanceOf(
+					AbortedTransactionError,
+				)
+				expect(trx.isCommitted).toBe(false)
+				expect(trx.isRolledBack).toBe(true)
+			} finally {
+				if (!trx.isCommitted && !trx.isRolledBack) {
+					await trx.rollback().execute()
+				}
+			}
+
+			expect(
+				await ctx.db
+					.selectFrom('person')
+					.selectAll()
+					.where('name', '=', 'shlomo')
+					.execute(),
+			).toEqual([])
+		})
+
+		it('should commit after recovering from a statement error using a savepoint', async () => {
+			const trx = await ctx.db.startTransaction().execute()
+
+			try {
+				await trx.insertInto('person').values({ name: 'shlomo' }).execute()
+
+				const savedTrx = await trx.savepoint('before_error').execute()
+
+				await expect(
+					savedTrx.insertInto('person').values({ name: 'moshe' }).execute(),
+				).rejects.toThrow('duplicate key')
+
+				await savedTrx.rollbackToSavepoint('before_error').execute()
+				await trx.commit().execute()
+
+				expect(trx.isCommitted).toBe(true)
+			} finally {
+				if (!trx.isCommitted) {
+					await trx.rollback().execute()
+				}
+			}
+
+			expect(
+				await ctx.db
+					.selectFrom('person')
+					.select('name')
+					.where('name', '=', 'shlomo')
+					.executeTakeFirstOrThrow(),
+			).toEqual({ name: 'shlomo' })
 		})
 	})
 }

@@ -1,6 +1,5 @@
 import { setTimeout } from 'node:timers/promises'
 import { AbortedTransactionError, Kysely, sql, type Transaction } from 'kysely'
-import postgres from 'postgres'
 import { isBun } from 'std-env'
 import {
 	afterAll,
@@ -15,6 +14,7 @@ import { PostgresJSDialect, type PostgresJSSql } from '..'
 import {
 	CONNECTION_STRING,
 	type Database,
+	getPostgresJs,
 	initTest,
 	resetState,
 	SUPPORTED_DIALECTS,
@@ -395,7 +395,9 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					const instance: PostgresJSSql =
 						dialect === 'bun'
 							? new Bun.SQL(options)
-							: (postgres(options as never) as unknown as PostgresJSSql)
+							: (getPostgresJs(dialect)(
+									options as never,
+								) as unknown as PostgresJSSql)
 
 					return {
 						end: () => instance.end(),
@@ -460,7 +462,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 
 			const db = new Kysely<Database>({
 				dialect: new PostgresJSDialect({
-					controlPostgres: dialect === 'bun' ? Bun.SQL : postgres,
+					controlPostgres: dialect === 'bun' ? Bun.SQL : getPostgresJs(dialect),
 					postgres: () =>
 						dialect === 'bun'
 							? import('bun').then(
@@ -469,7 +471,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 											max: 1,
 										}) as unknown as PostgresJSSql,
 								)
-							: (postgres(CONNECTION_STRING, {
+							: (getPostgresJs(dialect)(CONNECTION_STRING, {
 									max: 1,
 									onnotice() {},
 								}) as unknown as PostgresJSSql),

@@ -1,5 +1,6 @@
 import { type Generated, Kysely } from 'kysely'
 import postgres from 'postgres'
+import postgres4 from 'postgres4'
 import { isBun } from 'std-env'
 
 import {
@@ -11,7 +12,17 @@ import {
 export const CONNECTION_STRING =
 	'postgres://postgres:postgres@localhost:5432/main'
 
-export const SUPPORTED_DIALECTS = ['v3', 'bun'] as const
+export const SUPPORTED_DIALECTS = ['v3', 'v4', 'bun'] as const
+
+/**
+ * The `postgres` module for a postgres.js dialect. v4 is typed as v3, so tests
+ * can treat both the same.
+ */
+export function getPostgresJs(
+	dialect: (typeof SUPPORTED_DIALECTS)[number],
+): typeof postgres {
+	return dialect === 'v4' ? (postgres4 as unknown as typeof postgres) : postgres
+}
 
 const getDialect = (
 	dialect: (typeof SUPPORTED_DIALECTS)[number],
@@ -35,6 +46,13 @@ const getDialect = (
 					postgres(CONNECTION_STRING, {
 						onnotice() {},
 					}),
+			}),
+			v4: new PostgresJSDialect({
+				...config,
+				postgres: () =>
+					postgres4(CONNECTION_STRING, {
+						onnotice() {},
+					}) as unknown as PostgresJSSql,
 			}),
 		}) as const
 	)[dialect]

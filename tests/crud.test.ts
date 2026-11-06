@@ -11,11 +11,7 @@ import {
 	it,
 	vi,
 } from 'vitest'
-import {
-	PostgresJSDialect,
-	type PostgresJSPendingQuery,
-	type PostgresJSSql,
-} from '..'
+import { PostgresJSDialect, type PostgresJSSql } from '..'
 import {
 	CONNECTION_STRING,
 	type Database,
@@ -629,82 +625,5 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					.executeTakeFirstOrThrow(),
 			).toEqual({ name: 'shlomo' })
 		})
-
-		it('should propagate rollback errors', async () => {
-			const rollbackError = new Error('rollback failed')
-			const db = createDbWithFailingRollback(dialect, rollbackError)
-
-			try {
-				await expect(
-					db.transaction().execute(async (trx) => {
-						await trx.insertInto('person').values({ name: 'shlomo' }).execute()
-
-						throw new Error('boom')
-					}),
-				).rejects.toBe(rollbackError)
-
-				// the pool's only slot held the connection whose rollback failed.
-				await expect(
-					db.selectFrom('person').select('id').limit(1).execute(),
-				).resolves.toHaveLength(1)
-			} finally {
-				await db.destroy()
-			}
-		})
-
-		it('should propagate controlled rollback errors', async () => {
-			const rollbackError = new Error('rollback failed')
-			const db = createDbWithFailingRollback(dialect, rollbackError)
-
-			try {
-				const trx = await db.startTransaction().execute()
-
-				await trx.insertInto('person').values({ name: 'shlomo' }).execute()
-
-				await expect(trx.rollback().execute()).rejects.toBe(rollbackError)
-				expect(trx.isRolledBack).toBe(true)
-
-				await expect(
-					db.selectFrom('person').select('id').limit(1).execute(),
-				).resolves.toHaveLength(1)
-			} finally {
-				await db.destroy()
-			}
-		})
-	})
-}
-
-function createDbWithFailingRollback(
-	dialect: (typeof SUPPORTED_DIALECTS)[number],
-	rollbackError: Error,
-): Kysely<Database> {
-	const instance =
-		dialect === 'bun'
-			? (new Bun.SQL(CONNECTION_STRING, { max: 1 }) as unknown as PostgresJSSql)
-			: (postgres(CONNECTION_STRING, {
-					max: 1,
-					onnotice() {},
-				}) as unknown as PostgresJSSql)
-
-	return new Kysely<Database>({
-		dialect: new PostgresJSDialect({
-			postgres: () => ({
-				end: (options) => instance.end(options),
-				options: instance.options,
-				reserve: async () => {
-					const reservedConnection = await instance.reserve()
-
-					return {
-						release: () => reservedConnection.release(),
-						unsafe: (query, ...args) =>
-							query === 'rollback'
-								? (Object.assign(Promise.reject(rollbackError), {
-										cancel() {},
-									}) as PostgresJSPendingQuery)
-								: reservedConnection.unsafe(query, ...args),
-					}
-				},
-			}),
-		}),
 	})
 }

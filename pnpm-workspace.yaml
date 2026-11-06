@@ -10,7 +10,7 @@ allowBuilds:
 # https://pnpm.io/cli/audit#configuration
 audit:
   ignore:
-    # `esbuild@>=0.27.3 <0.28.1` allows arbitrary file read when running the development server on Windows. `vitest@5.0.1` still on `esbuild@0.27.x`.
+    # `esbuild@>=0.27.3 <0.28.1` allows arbitrary file read when running the development server on Windows. `vitest@5.1.0` still on `esbuild@0.27.x`.
     # https://github.com/advisories/GHSA-g7r4-m6w7-qqqr
     - GHSA-g7r4-m6w7-qqqr
 

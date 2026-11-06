@@ -17,7 +17,6 @@ import type {
 } from './dialect-config.js'
 import { freeze } from './utils.js'
 
-const DISCARD_CONNECTION_SYMBOL = Symbol('discard')
 const RELEASE_CONNECTION_SYMBOL = Symbol('release')
 const SESSION_KILLED_SYMBOL = Symbol('sessionKilled')
 
@@ -105,17 +104,13 @@ export class PostgresJSDriver extends PostgresDriver {
 				)
 	}
 
+	// core's implementation marks its own connection class for discard on
+	// failure, through a method our connection doesn't have. the client
+	// handles a released connection that is still inside a transaction.
 	override async rollbackTransaction(
 		connection: DatabaseConnection,
 	): Promise<void> {
-		try {
-			await connection.executeQuery(CompiledQuery.raw('rollback'))
-		} catch (error) {
-			// a failed rollback can leave the session inside an open transaction.
-			// the connection must not go back into rotation.
-			;(connection as PostgresJSConnection)[DISCARD_CONNECTION_SYMBOL]()
-			throw error
-		}
+		await connection.executeQuery(CompiledQuery.raw('rollback'))
 	}
 
 	override async releaseConnection(
@@ -163,7 +158,6 @@ class PostgresJSConnection implements DatabaseConnection {
 	readonly #controlPostgres: PostgresJSSql | undefined
 	readonly #isBun: boolean | undefined
 	readonly #reservedConnection: PostgresJSReservedSql
-	#discarded = false
 	#pendingQuery: PostgresJSPendingQuery | undefined
 	#pid: number | undefined
 	#sessionKilled = false
@@ -203,8 +197,6 @@ class PostgresJSConnection implements DatabaseConnection {
 			return
 		}
 
-		this.#assertNotDiscarded()
-
 		const [{ pid }] = await this.#reservedConnection.unsafe(
 			'select pg_backend_pid() as pid',
 		)
@@ -215,8 +207,6 @@ class PostgresJSConnection implements DatabaseConnection {
 	async executeQuery<R>(
 		compiledQuery: CompiledQuery<unknown>,
 	): Promise<QueryResult<R>> {
-		this.#assertNotDiscarded()
-
 		this.#pendingQuery = this.#reservedConnection.unsafe(
 			compiledQuery.sql,
 			[...compiledQuery.parameters],
@@ -322,8 +312,6 @@ class PostgresJSConnection implements DatabaseConnection {
 			throw new PostgresJSDialectError('chunkSize must be a positive integer')
 		}
 
-		this.#assertNotDiscarded()
-
 		this.#pendingQuery = this.#reservedConnection.unsafe(compiledQuery.sql, [
 			...compiledQuery.parameters,
 		])
@@ -386,16 +374,6 @@ class PostgresJSConnection implements DatabaseConnection {
 			}
 		} finally {
 			controlConnection.release()
-		}
-	}
-
-	[DISCARD_CONNECTION_SYMBOL](): void {
-		this.#discarded = true
-	}
-
-	#assertNotDiscarded(): void {
-		if (this.#discarded) {
-			throw new PostgresJSDialectError('connection has been discarded')
 		}
 	}
 

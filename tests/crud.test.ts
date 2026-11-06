@@ -630,29 +630,20 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			).toEqual({ name: 'shlomo' })
 		})
 
-		it('should discard the connection when rollback fails', async () => {
+		it('should propagate rollback errors', async () => {
 			const rollbackError = new Error('rollback failed')
 			const db = createDbWithFailingRollback(dialect, rollbackError)
 
 			try {
-				let escapedTrx: Transaction<Database> | undefined
-
 				await expect(
 					db.transaction().execute(async (trx) => {
-						escapedTrx = trx
-
 						await trx.insertInto('person').values({ name: 'shlomo' }).execute()
 
 						throw new Error('boom')
 					}),
 				).rejects.toBe(rollbackError)
 
-				await expect(
-					// biome-ignore lint/style/noNonNullAssertion: assigned in the callback above.
-					escapedTrx!.selectFrom('person').selectAll().execute(),
-				).rejects.toThrow('connection has been discarded')
-
-				// the pool's only slot held the discarded connection.
+				// the pool's only slot held the connection whose rollback failed.
 				await expect(
 					db.selectFrom('person').select('id').limit(1).execute(),
 				).resolves.toHaveLength(1)
@@ -661,7 +652,7 @@ for (const dialect of SUPPORTED_DIALECTS) {
 			}
 		})
 
-		it('should discard the connection when a controlled rollback fails', async () => {
+		it('should propagate controlled rollback errors', async () => {
 			const rollbackError = new Error('rollback failed')
 			const db = createDbWithFailingRollback(dialect, rollbackError)
 

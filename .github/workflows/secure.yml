@@ -27,7 +27,7 @@ jobs:
           cache: true
 
       - name: Use Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: lts/*
 
@@ -48,7 +48,7 @@ jobs:
           persist-credentials: false
 
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+        uses: zizmorcore/zizmor-action@45d7276c9ca790aabd705e31ca99c6185c3e76dd # v0.8.1
         with:
           advanced-security: false
           annotations: true

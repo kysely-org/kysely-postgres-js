@@ -56,23 +56,23 @@
   },
   "devDependencies": {
     "@arethetypeswrong/core": "0.18.5",
-    "@biomejs/biome": "2.5.14",
+    "@biomejs/biome": "2.6.5",
     "@tsconfig/node24": "24.0.5",
-    "@types/bun": "1.4.2",
-    "@types/node": "26.6.2",
+    "@types/bun": "1.4.4",
+    "@types/node": "26.6.6",
     "jsr": "0.14.3",
     "kysely": "0.29.8",
     "postgres": "3.4.9",
-    "publint": "0.3.24",
-    "std-env": "4.2.0",
-    "tsdown": "0.23.0",
+    "publint": "0.3.25",
+    "std-env": "4.3.0",
+    "tsdown": "0.23.5",
     "typescript": "7.0.2",
-    "vitest": "5.0.1"
+    "vitest": "5.1.0"
   },
   "sideEffects": false,
   "engines": {
     "bun": ">=1.2",
     "node": ">=22"
   },
-  "packageManager": "pnpm@12.6.0+sha512.3ef68f951cb111ac204b4a5a16f0b2ddf0da56a96e0413e81d855d9f0b55ef926714709028e1cd00c405c2c5fb7b9e8ec4dc46777c805d0373c2f2ff00fd20ec"
+  "packageManager": "pnpm@12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3"
 }

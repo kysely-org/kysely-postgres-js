@@ -53,27 +53,27 @@ import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
 
 interface Database {
-  person: {
-    id: GeneratedAlways<number>
-    first_name: string | null
-    last_name: string | null
-    age: number
-  }
+	person: {
+		id: GeneratedAlways<number>
+		first_name: string | null
+		last_name: string | null
+		age: number
+	}
 }
 
 const db = new Kysely<Database>({
-  dialect: new PostgresJSDialect({
-    postgres: postgres({
-      database: 'test',
-      host: 'localhost',
-      max: 10,
-      port: 5434,
-      user: 'admin',
-    }),
-  }),
+	dialect: new PostgresJSDialect({
+		postgres: postgres({
+			database: 'test',
+			host: 'localhost',
+			max: 10,
+			port: 5434,
+			user: 'admin',
+		}),
+	}),
 })
 
-const people = await db.selectFrom("person").selectAll().execute();
+const people = await db.selectFrom('person').selectAll().execute()
 ```
 
 ### Bun
@@ -84,27 +84,27 @@ import { type GeneratedAlways, Kysely } from 'kysely'
 import { PostgresJSDialect } from 'kysely-postgres-js'
 
 interface Database {
-  person: {
-    id: GeneratedAlways<number>
-    first_name: string | null
-    last_name: string | null
-    age: number
-  }
+	person: {
+		id: GeneratedAlways<number>
+		first_name: string | null
+		last_name: string | null
+		age: number
+	}
 }
 
 const db = new Kysely<Database>({
-  dialect: new PostgresJSDialect({
-    postgres: new SQL({
-      database: 'test',
-      host: 'localhost',
-      max: 10,
-      port: 5434,
-      user: 'admin',
-    }),
-  }),
+	dialect: new PostgresJSDialect({
+		postgres: new SQL({
+			database: 'test',
+			host: 'localhost',
+			max: 10,
+			port: 5434,
+			user: 'admin',
+		}),
+	}),
 })
 
-const people = await db.selectFrom("person").selectAll().execute();
+const people = await db.selectFrom('person').selectAll().execute()
 ```
 
 ## Aborting queries
@@ -115,12 +115,12 @@ which stop the aborted query on the database side:
 
 ```ts
 await db
-  .selectFrom('person')
-  .selectAll()
-  .execute({
-    signal: AbortSignal.timeout(5_000),
-    inflightQueryAbortStrategy: 'kill session',
-  })
+	.selectFrom('person')
+	.selectAll()
+	.execute({
+		signal: AbortSignal.timeout(5_000),
+		inflightQueryAbortStrategy: 'kill session',
+	})
 ```
 
 Under the hood, `'cancel query'` uses [Postgres.js](https://github.com/porsager/postgres)'
@@ -152,16 +152,16 @@ import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
 
 const db = new Kysely<Database>({
-  dialect: new PostgresJSDialect({
-    controlPostgres: postgres,
-    postgres: postgres({
-      database: 'test',
-      host: 'localhost',
-      max: 10,
-      port: 5434,
-      user: 'admin',
-    }),
-  }),
+	dialect: new PostgresJSDialect({
+		controlPostgres: postgres,
+		postgres: postgres({
+			database: 'test',
+			host: 'localhost',
+			max: 10,
+			port: 5434,
+			user: 'admin',
+		}),
+	}),
 })
 ```
 
@@ -173,16 +173,16 @@ import { Kysely } from 'kysely'
 import { PostgresJSDialect } from 'kysely-postgres-js'
 
 const db = new Kysely<Database>({
-  dialect: new PostgresJSDialect({
-    controlPostgres: SQL,
-    postgres: new SQL({
-      database: 'test',
-      host: 'localhost',
-      max: 10,
-      port: 5434,
-      user: 'admin',
-    }),
-  }),
+	dialect: new PostgresJSDialect({
+		controlPostgres: SQL,
+		postgres: new SQL({
+			database: 'test',
+			host: 'localhost',
+			max: 10,
+			port: 5434,
+			user: 'admin',
+		}),
+	}),
 })
 ```
 

@@ -113,7 +113,7 @@ export class PostgresJSDriver extends PostgresDriver {
 		} catch (error) {
 			// a failed rollback can leave the session inside an open transaction.
 			// the connection must not go back into rotation.
-			await (connection as PostgresJSConnection)[DISCARD_CONNECTION_SYMBOL]()
+			;(connection as PostgresJSConnection)[DISCARD_CONNECTION_SYMBOL]()
 			throw error
 		}
 	}
@@ -163,7 +163,6 @@ class PostgresJSConnection implements DatabaseConnection {
 	readonly #controlPostgres: PostgresJSSql | undefined
 	readonly #isBun: boolean | undefined
 	readonly #reservedConnection: PostgresJSReservedSql
-	#closed = false
 	#discarded = false
 	#pendingQuery: PostgresJSPendingQuery | undefined
 	#pid: number | undefined
@@ -390,28 +389,8 @@ class PostgresJSConnection implements DatabaseConnection {
 		}
 	}
 
-	async [DISCARD_CONNECTION_SYMBOL](): Promise<void> {
+	[DISCARD_CONNECTION_SYMBOL](): void {
 		this.#discarded = true
-
-		// `postgres` closes a reserved connection that is released with a
-		// transaction still open. Bun SQL recycles it, transaction and all, so
-		// we close it instead of releasing it. if closing fails, we release as
-		// usual rather than leak the pool slot.
-		//
-		// Bun < 1.4 can't `end()` a pool after one of its reserved connections
-		// was closed, so we leave the connection to the pool there.
-		if (
-			!this.#isBun ||
-			!this.#reservedConnection.close ||
-			!Bun.semver.satisfies(Bun.version, '>=1.4')
-		) {
-			return
-		}
-
-		this.#closed = await this.#reservedConnection.close().then(
-			() => true,
-			() => false,
-		)
 	}
 
 	#assertNotDiscarded(): void {
@@ -425,11 +404,6 @@ class PostgresJSConnection implements DatabaseConnection {
 		// dead connection to its closed queue. releasing it would move it back
 		// to the open queue, and queries dispatched to it would then hang.
 		if (this.#sessionKilled && !this.#isBun) {
-			return
-		}
-
-		// closed by `DISCARD_CONNECTION_SYMBOL`.
-		if (this.#closed) {
 			return
 		}
 

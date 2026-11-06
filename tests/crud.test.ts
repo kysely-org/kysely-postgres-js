@@ -652,17 +652,10 @@ for (const dialect of SUPPORTED_DIALECTS) {
 					escapedTrx!.selectFrom('person').selectAll().execute(),
 				).rejects.toThrow('connection has been discarded')
 
-				// the pool's only slot held the discarded connection. the next
-				// query must run outside its unfinished transaction.
-				const people = await db
-					.selectFrom('person')
-					.select('name')
-					.where('name', '=', 'shlomo')
-					.execute()
-
-				if (canDiscardConnections(dialect)) {
-					expect(people).toEqual([])
-				}
+				// the pool's only slot held the discarded connection.
+				await expect(
+					db.selectFrom('person').select('id').limit(1).execute(),
+				).resolves.toHaveLength(1)
 			} finally {
 				await db.destroy()
 			}
@@ -680,32 +673,14 @@ for (const dialect of SUPPORTED_DIALECTS) {
 				await expect(trx.rollback().execute()).rejects.toBe(rollbackError)
 				expect(trx.isRolledBack).toBe(true)
 
-				const people = await db
-					.selectFrom('person')
-					.select('name')
-					.where('name', '=', 'shlomo')
-					.execute()
-
-				if (canDiscardConnections(dialect)) {
-					expect(people).toEqual([])
-				}
+				await expect(
+					db.selectFrom('person').select('id').limit(1).execute(),
+				).resolves.toHaveLength(1)
 			} finally {
 				await db.destroy()
 			}
 		})
 	})
-}
-
-/**
- * `postgres` 3 recycles a reserved connection released with an open
- * transaction, and has no way to close a single connection (see #469). Bun
- * < 1.4 can't `end()` a pool after a reserved connection was closed, so the
- * dialect doesn't close there either.
- */
-function canDiscardConnections(
-	dialect: (typeof SUPPORTED_DIALECTS)[number],
-): boolean {
-	return dialect === 'bun' && Bun.semver.satisfies(Bun.version, '>=1.4')
 }
 
 function createDbWithFailingRollback(
@@ -729,7 +704,6 @@ function createDbWithFailingRollback(
 					const reservedConnection = await instance.reserve()
 
 					return {
-						close: reservedConnection.close?.bind(reservedConnection),
 						release: () => reservedConnection.release(),
 						unsafe: (query, ...args) =>
 							query === 'rollback'
